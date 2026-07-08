@@ -1,19 +1,28 @@
-export default function DriverNav() {
+import Link from "next/link";
+import Image from "next/image"
+
+export default function LandingNav() {
   return (
-    <nav className="bg-white border-b border-slate-200 px-8 h-[60px] flex items-center justify-between">
+    <nav className="bg-[#FCF0DB] px-8 h-[76px] flex items-center justify-between">
 
       {/* Logo */}
-      <a href="/" className="flex items-center gap-2.5 no-underline">
-        <span className="text-[16px] font-bold text-slate-900 tracking-tight">Logistiq</span>
-      </a>
+      <Link href="/" className="flex items-center gap-2 no-underline">
+        <Image
+          src="/logistiq-logo.svg"
+          alt="Logistiq"
+          width={40}
+          height={40}
+          className="h-50 w-50"
+        />
+      </Link>
 
       {/* Nav links */}
-      <ul className="flex items-center gap-1 list-none">
-        {["Products", "Features", "About us", "Contact Us"].map((link) => (
+      <ul className="hidden md:flex items-center gap-8 list-none">
+        {["Support", "Pricing", "Book a Demo"].map((link) => (
           <li key={link}>
             <a
               href="#"
-              className="text-sm text-slate-500 font-medium px-3 py-1.5 rounded-md hover:bg-slate-100 hover:text-slate-900 transition-colors no-underline"
+              className="text-lg  text-slate-900 font-bold hover:text-slate-600 transition-colors no-underline"
             >
               {link}
             </a>
@@ -22,12 +31,18 @@ export default function DriverNav() {
       </ul>
 
       {/* Auth buttons */}
-      <div className="flex items-center gap-2">
-        <a href="/sign-in" className="text-sm font-medium text-slate-500 hover:text-slate-900 hover:bg-slate-100 px-3.5 py-1.5 rounded-[7px] transition-colors no-underline">
-          Sign in
+      <div className="flex items-center gap-3">
+        <a
+          href="/sign-in"
+          className="text-[15px] font-semibold text-slate-900 border border-slate-900/70 hover:bg-slate-900 hover:text-white px-5 py-2 rounded-full transition-colors no-underline"
+        >
+          Log in
         </a>
-        <a href="/sign-up" className="text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-1.5 rounded-[7px] transition-colors no-underline tracking-tight">
-          Sign up
+        <a
+          href="/sign-up"
+          className="text-[15px] font-bold text-slate-900 bg-[#F5A623] hover:bg-[#e69712] px-5 py-2 rounded-full transition-colors no-underline"
+        >
+          Free trial
         </a>
       </div>
 

@@ -3,24 +3,25 @@
 
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
-enum USERROLE {
-  DRIVER
-  BROKER
-  DRIVERLEADER
-  MAINTNANCE
-  DISPATCH
-  FLEET
-  COMPLIANCE
-  ACCOUNTING
-}
+
 
 generator client {
   provider = "prisma-client"
-  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+enum USERROLE {
+  DRIVER
+  BROKER
+  DRIVERLEADER
+  MAINTENANCE
+  DISPATCH
+  FLEET
+  COMPLIANCE
+  ACCOUNTING
 }
 
 model User {

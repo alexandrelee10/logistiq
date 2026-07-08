@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 460" width="1240" height="460">
+  <title>Logistiq feature cards</title>
+  <desc>Three stylized cards showing a product stock card, an orders and statuses card, and a redacted cost and margins card.</desc>
+
+  <defs>
+    <clipPath id="card2clip">
+      <rect x="440" y="90" width="360" height="330" rx="20" />
+    </clipPath>
+    <clipPath id="card3clip">
+      <rect x="860" y="90" width="360" height="330" rx="20" />
+    </clipPath>
+  </defs>
+
+  <rect x="60" y="10" width="280" height="70" rx="16" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" />
+  <g stroke="#F5A623" stroke-width="3" stroke-linecap="round" fill="none">
+    <path d="M72 24 L72 18 L80 18" />
+    <path d="M328 24 L328 18 L320 18" />
+    <path d="M72 66 L72 72 L80 72" />
+    <path d="M328 66 L328 72 L320 72" />
+  </g>
+  <g fill="#1e293b">
+    <rect x="142" y="28" width="3" height="24" />
+    <rect x="149" y="28" width="2" height="24" />
+    <rect x="155" y="28" width="4" height="24" />
+    <rect x="163" y="28" width="2" height="24" />
+    <rect x="169" y="28" width="3" height="24" />
+    <rect x="176" y="28" width="2" height="24" />
+    <rect x="182" y="28" width="4" height="24" />
+    <rect x="190" y="28" width="3" height="24" />
+    <rect x="197" y="28" width="2" height="24" />
+    <rect x="203" y="28" width="4" height="24" />
+    <rect x="211" y="28" width="2" height="24" />
+    <rect x="217" y="28" width="3" height="24" />
+    <rect x="224" y="28" width="4" height="24" />
+    <rect x="232" y="28" width="2" height="24" />
+    <rect x="238" y="28" width="3" height="24" />
+    <rect x="245" y="28" width="4" height="24" />
+    <rect x="253" y="28" width="2" height="24" />
+    <rect x="259" y="28" width="3" height="24" />
+  </g>
+
+  <rect x="20" y="90" width="360" height="330" rx="20" fill="#3E6FA0" />
+  <circle cx="345" cy="120" r="14" fill="#ffffff" />
+  <g stroke="#1e293b" stroke-width="2" stroke-linecap="round">
+    <path d="M340 115 L350 125" />
+    <path d="M350 115 L340 125" />
+  </g>
+  <rect x="50" y="150" width="100" height="100" rx="14" fill="#FCF0DB" />
+  <rect x="70" y="185" width="60" height="50" rx="4" fill="#1e293b" />
+  <rect x="95" y="185" width="10" height="50" fill="#F5A623" />
+  <rect x="70" y="205" width="60" height="10" fill="#F5A623" />
+  <text x="170" y="180" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="21">Ceramic mug</text>
+  <text x="170" y="206" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="21">Blue - 12oz</text>
+  <rect x="170" y="220" width="120" height="32" rx="16" fill="#ffffff" />
+  <text x="230" y="241" fill="#1e293b" font-family="sans-serif" font-weight="600" font-size="14" text-anchor="middle">36 in stock</text>
+  <text x="350" y="392" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="26" text-anchor="end">$14.50</text>
+
+  <rect x="440" y="90" width="360" height="330" rx="20" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" />
+  <g clip-path="url(#card2clip)">
+    <rect x="440" y="90" width="360" height="70" fill="#F5A623" />
+  </g>
+  <text x="465" y="133" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="19">Orders &amp; statuses</text>
+  <text x="465" y="205" fill="#1e293b" font-family="sans-serif" font-weight="700" font-size="21">PO - 000482</text>
+  <rect x="465" y="223" width="120" height="32" rx="16" fill="#ccfbf1" />
+  <text x="525" y="244" fill="#0f766e" font-family="sans-serif" font-weight="600" font-size="14" text-anchor="middle">Fulfilled</text>
+  <circle cx="483" cy="382" r="18" fill="#a78bfa" />
+  <text x="483" y="387" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="15" text-anchor="middle">A</text>
+  <text x="775" y="388" fill="#1e293b" font-family="sans-serif" font-weight="700" font-size="24" text-anchor="end">$1,240.00</text>
+
+  <rect x="860" y="90" width="360" height="330" rx="20" fill="#ffffff" stroke="#e5e7eb" stroke-width="1" />
+  <g clip-path="url(#card3clip)">
+    <rect x="860" y="90" width="360" height="70" fill="#14b8a6" />
+  </g>
+  <text x="885" y="133" fill="#ffffff" font-family="sans-serif" font-weight="700" font-size="19">Cost &amp; margins</text>
+  <g stroke="#eef2f7" stroke-width="1">
+    <line x1="880" y1="185" x2="1200" y2="185" />
+    <line x1="880" y1="225" x2="1200" y2="225" />
+    <line x1="880" y1="265" x2="1200" y2="265" />
+    <line x1="880" y1="345" x2="1200" y2="345" />
+    <line x1="880" y1="385" x2="1200" y2="385" />
+  </g>
+  <rect x="940" y="230" width="200" height="90" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" />
+  <g stroke="#475569" stroke-width="1.5" stroke-linecap="round" fill="none">
+    <rect x="955" y="245" width="14" height="14" rx="2" />
+    <path d="M955 259 L969 245" />
+  </g>
+  <rect x="985" y="240" width="130" height="26" rx="13" fill="#fbcfe8" />
+  <text x="1050" y="258" fill="#be185d" font-family="sans-serif" font-weight="700" font-size="13" text-anchor="middle" letter-spacing="2">* * * * * *</text>
+  <rect x="985" y="275" width="80" height="26" rx="13" fill="#ddd6fe" />
+  <text x="1025" y="293" fill="#6d28d9" font-family="sans-serif" font-weight="700" font-size="13" text-anchor="middle" letter-spacing="2">* * *</text>
+</svg>

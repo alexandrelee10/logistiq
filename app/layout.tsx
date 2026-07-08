@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Sora, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import DriverNav from "./components/driver/nav/Nav";
+import LandingNav from "./components/driver/nav/Nav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const sora = Sora({
+  variable: "--font-sora",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 const geistMono = Geist_Mono({
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Logistiq",
-  description: "Your new truck driving TMS",
+  description: "Inventory software that puts you in control",
 };
 
 export default function RootLayout({
@@ -26,10 +27,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${sora.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <DriverNav />
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <LandingNav />
+        {children}
+      </body>
     </html>
   );
 }
