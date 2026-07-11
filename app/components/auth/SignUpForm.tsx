@@ -1,7 +1,9 @@
 "use client"
 
+import Image from "next/image";
 import { NextResponse } from "next/server";
 import { useState } from "react";
+import logistiqLogo from "@/public/assets/logo/new-logo-dark.png"
 
 type SignUpFormData = {
     firstName: string,
@@ -51,4 +53,25 @@ export default function SignUp() {
         }
 
     }
+
+    return (
+        <main className="">
+            <div className="flex">
+                {/* Left */}
+                <div className="flex-1 bg-red-700 min-h-screen">
+                    <Image 
+                    src={logistiqLogo}
+                    alt="Logo"
+                    height={400}
+                    width={400}
+                    className="justify-center items-center"
+                    />
+                </div>
+                {/* Right */}
+                <div className="flex-1">
+
+                </div>
+            </div>
+        </main>
+    )
 }
