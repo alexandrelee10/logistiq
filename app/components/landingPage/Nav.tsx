@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import logistiqLogo from "@/public/assets/logo/logistiq-logo.svg"
+import logistiqLogo from "@/public/assets/logo/logo.png";
 
 const NAV_LINKS = [
   { label: "Platform", href: "/landingPage/platform" },
@@ -16,18 +16,26 @@ const NAV_LINKS = [
 
 export default function LandingNav() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-black/10">
       <div className="max-w-[1360px] mx-auto px-6 md:px-10 h-[68px] flex items-center justify-between">
         {/* Logo */}
         <Link className="flex items-center gap-2" href="/landingPage">
-          <span className="font-extrabold text-lg text-[#0B1A3E]">Logistiq</span>
-          {/* <Image 
-          src={logistiqLogo}
-          alt="Logo" 
-          className="object-fit"
-          /> */}
+          {logoError ? (
+            <span className="font-extrabold text-lg text-[#0B1A3E]">Logistiq</span>
+          ) : (
+            <Image
+              src={logistiqLogo}
+              alt="Logistiq"
+              className="h-44 w-auto object-contain"
+              priority
+              onError={() => setLogoError(true)}
+              height={400}
+              width={400}
+            />
+          )}
         </Link>
 
         {/* Nav Elements */}

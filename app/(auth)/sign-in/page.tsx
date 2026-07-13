@@ -1,9 +1,12 @@
-import React from 'react'
+import SignIn from '@/app/components/auth/SignInForm'
+import { Suspense } from 'react'
 
-const Temp = () => {
+const page = () => {
   return (
-    <div>Temp</div>
+    <Suspense fallback={null}>
+      <SignIn />
+    </Suspense>
   )
 }
 
-export default Temp
+export default page

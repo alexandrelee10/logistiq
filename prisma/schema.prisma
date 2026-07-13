@@ -7,6 +7,7 @@
 
 generator client {
   provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,12 +15,13 @@ datasource db {
 }
 
 enum USERROLE {
-  ADMINISTRATOR
-  MANAGER
-  WAREHOUSE_EMPLOYEE
-  INVENTORY_CLERK
-  PURCHASING_AGENT
-  SALES_REPRESENTATIVE
+  DRIVER
+  BROKER
+  DRIVERLEADER
+  MAINTENANCE
+  DISPATCH
+  FLEET
+  COMPLIANCE
   ACCOUNTING
 }
 
