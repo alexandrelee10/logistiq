@@ -90,7 +90,7 @@ export default function SignUp() {
                 return;
             }
 
-            router.push("/sign-in?created=1");
+            router.push("/dashboard");
         } catch {
             setServerMessage("Something went wrong. Please try again.");
         } finally {

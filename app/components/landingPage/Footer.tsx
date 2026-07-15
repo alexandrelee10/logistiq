@@ -44,7 +44,7 @@ const FOOTER_COLUMNS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-[#0A1330] text-white/70">
+    <footer className="bg-gradient-to-b from-[#0A1330] to-[#060b1f] text-white/70">
       <div className="max-w-[1360px] mx-auto px-6 md:px-10 py-16">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-14">
           {FOOTER_COLUMNS.map((col) => (
@@ -74,7 +74,7 @@ export default function Footer() {
                 key={s}
                 href="#"
                 aria-label={s}
-                className="h-8 w-8 flex items-center justify-center border border-white/20 text-white/60 hover:text-white hover:border-white/40 transition-colors text-xs font-bold no-underline"
+                className="h-9 w-9 flex items-center justify-center rounded-full border border-white/15 text-white/60 hover:text-white hover:border-white/40 hover:bg-white/5 transition-colors text-xs font-bold no-underline"
               >
                 {s}
               </a>
