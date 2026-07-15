@@ -136,7 +136,7 @@ export default async function DashboardPage() {
       {/* Bento grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         {/* Products to reorder */}
-        <div className="xl:col-span-4 xl:row-span-2 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+        <div className="xl:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
           <CardHeader
             icon={RefreshCw}
             count={String(REORDER_ITEMS.length)}
@@ -233,19 +233,19 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Revenue chart */}
-        <div className="xl:col-span-8 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
-          <CardHeader icon={BarChart3} count="$182,400" label="Total sales revenue · last 30 days" />
-          <div className="flex items-end gap-1.5 h-36">
-            {REVENUE_BARS.map((v, i) => (
-              <div
-                key={i}
-                className={`flex-1 rounded-t-md ${i === 10 ? "bg-accent" : "bg-slate-200"}`}
-                style={{ height: `${v}%` }}
-              />
-            ))}
-          </div>
+      {/* Revenue chart — full width, its own row */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 mt-6">
+        <CardHeader icon={BarChart3} count="$182,400" label="Total sales revenue · last 30 days" />
+        <div className="flex items-end gap-1.5 h-36">
+          {REVENUE_BARS.map((v, i) => (
+            <div
+              key={i}
+              className={`flex-1 rounded-t-md ${i === 10 ? "bg-accent" : "bg-slate-200"}`}
+              style={{ height: `${v}%` }}
+            />
+          ))}
         </div>
       </div>
 
