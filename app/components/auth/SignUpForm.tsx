@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, ChevronDown } from "lucide-react";
 import AuthLayout from "./AuthLayout";
 
-type Role = "DRIVER" | "BROKER" | "DRIVERLEADER" | "MAINTENANCE" | "DISPATCH" | "FLEET" | "COMPLIANCE" | "ACCOUNTING";
+type Role = "ADMIN" | "MANAGER" | "WAREHOUSE_STAFF" | "PURCHASING" | "ACCOUNTING" | "VIEWER";
 
 type SignUpFormData = {
     firstName: string,
@@ -18,14 +18,12 @@ type SignUpFormData = {
 }
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
-    { value: "DRIVER", label: "Driver" },
-    { value: "DRIVERLEADER", label: "Driver Leader" },
-    { value: "BROKER", label: "Broker" },
-    { value: "DISPATCH", label: "Dispatch" },
-    { value: "FLEET", label: "Fleet Manager" },
-    { value: "MAINTENANCE", label: "Maintenance" },
-    { value: "COMPLIANCE", label: "Compliance" },
+    { value: "ADMIN", label: "Admin" },
+    { value: "MANAGER", label: "Manager" },
+    { value: "WAREHOUSE_STAFF", label: "Warehouse Staff" },
+    { value: "PURCHASING", label: "Purchasing" },
     { value: "ACCOUNTING", label: "Accounting" },
+    { value: "VIEWER", label: "Viewer" },
 ];
 
 type FieldErrors = Partial<Record<keyof SignUpFormData, string>>;
@@ -39,7 +37,7 @@ export default function SignUp() {
         phoneNumber: "",
         email: "",
         password: "",
-        role: "DRIVER" // DEFAULT
+        role: "ADMIN" // DEFAULT
     });
 
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});

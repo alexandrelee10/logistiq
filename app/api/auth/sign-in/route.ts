@@ -1,5 +1,7 @@
 import { prisma } from "@/app/lib/prisma";
 import { SESSION_COOKIE_NAME } from "@/app/lib/auth";
+import { createSession } from "@/app/lib/session";
+import { signInSessionToken } from "@/app/lib/jwt";
 import { signinSchema } from "@/validations/auth";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
@@ -12,7 +14,10 @@ export async function POST(req: Request) {
 
         if (!validation.success) {
             return NextResponse.json(
-                { message: "Fill in required fields", error: validation.error.flatten() },
+                {
+                    message: "Fill in required fields",
+                    error: validation.error.flatten(),
+                },
                 { status: 400 }
             );
         }
@@ -23,7 +28,6 @@ export async function POST(req: Request) {
             where: { email },
         });
 
-        // Same message for missing user vs bad password so we don't leak which one was wrong
         if (!user) {
             return NextResponse.json(
                 { message: "Invalid email or password" },
@@ -31,7 +35,10 @@ export async function POST(req: Request) {
             );
         }
 
-        const passwordMatches = await bcrypt.compare(password, user.password);
+        const passwordMatches = await bcrypt.compare(
+            password,
+            user.password
+        );
 
         if (!passwordMatches) {
             return NextResponse.json(
@@ -40,15 +47,19 @@ export async function POST(req: Request) {
             );
         }
 
+        const session = await createSession(user.id);
+        const token = signInSessionToken(session.id);
+
         const cookieStore = await cookies();
+
         cookieStore.set({
             name: SESSION_COOKIE_NAME,
-            value: user.id,
+            value: token,
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             path: "/",
-            maxAge: 60 * 60 * 24 * 7, // 7 days
+            maxAge: 60 * 60 * 24 * 30,
         });
 
         return NextResponse.json(

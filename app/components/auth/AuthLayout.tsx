@@ -32,7 +32,7 @@ export default function AuthLayout({ title, subtitle, children, footer }: AuthLa
         </div>
 
         <Link href="/landingPage" className="mt-4 flex justify-center">
-          <Image src={logistiqLogo} alt="Logistiq" height={400} width={400} className="h-14 w-auto" />
+          <Image src={logistiqLogo} alt="Logistiq" height={400} width={400} className="h-44 w-auto" />
         </Link>
 
         <h1 className="mt-8 text-center text-2xl font-extrabold text-foreground tracking-tight">{title}</h1>

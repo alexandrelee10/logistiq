@@ -266,10 +266,10 @@ export default function LandingNav() {
             <Image
               src={logistiqLogo}
               alt="Logistiq"
-              className="h-11 w-auto object-contain"
+              className="h-44 w-auto object-contain"
               priority
               onError={() => setLogoError(true)}
-              height={400}
+              height={600}
               width={400}
             />
           )}

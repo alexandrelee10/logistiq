@@ -22,6 +22,7 @@ import {
   Eye,
   LogOut,
   X,
+  NotebookPenIcon,
   type LucideIcon,
 } from "lucide-react";
 import logistiqLogo from "@/public/assets/logo/logo.png";
@@ -45,18 +46,22 @@ type NavItem = {
   href: string;
   actions?: NavAction[];
 };
-
+// Side bar elements
 const MAIN_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+  // Inventory Management Section
   {
     icon: Package,
     label: "Inventory",
     href: "/dashboard/inventory",
     actions: [
       { icon: Eye, label: "View Inventory", href: "/dashboard/inventory" },
+      { icon: NotebookPenIcon, label: "Inventory Adjustments", href: "/dashboard/inventory/adjustments"},
       { icon: Plus, label: "Add Product", href: "/dashboard/inventory/new" },
+      
     ],
   },
+  // Orders Section
   {
     icon: ShoppingCart,
     label: "Orders",
@@ -66,6 +71,7 @@ const MAIN_NAV: NavItem[] = [
       { icon: Plus, label: "Create Order", href: "/dashboard/orders/new" },
     ],
   },
+  // Warehouses Section
   {
     icon: Warehouse,
     label: "Warehouses",
@@ -75,6 +81,7 @@ const MAIN_NAV: NavItem[] = [
       { icon: Plus, label: "Add Warehouse", href: "/dashboard/warehouses/new" },
     ],
   },
+  // Purchase or Sales Order Section 
   {
     icon: ClipboardList,
     label: "Purchase Orders",
@@ -84,6 +91,7 @@ const MAIN_NAV: NavItem[] = [
       { icon: Plus, label: "Create Purchase Order", href: "/dashboard/purchase-orders/new" },
     ],
   },
+  // Reports Section
   {
     icon: BarChart3,
     label: "Reports",

@@ -1,12 +1,29 @@
 import { cookies } from "next/headers";
+import { getValidSession, verifySessionToken } from "./jwt";
+import { prisma } from "./prisma";
 
-// TODO: replace with real session/token verification once the auth/token
-// system is built. For now this just checks for the presence of a cookie.
+
 const SESSION_COOKIE_NAME = "logistiq_session";
 
+// Authentication Check 
 export async function isAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies();
-  return Boolean(cookieStore.get(SESSION_COOKIE_NAME)?.value);
+  return Boolean(getCurrentUser());
 }
 
 export { SESSION_COOKIE_NAME };
+
+// Get current User
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
+
+  if (!token) return null;
+
+  const decoded = verifySessionToken(token);
+  if (!decoded) return null;
+
+  const session = await getValidSession(decoded.sid);
+  if (!session) return null;
+
+  return prisma.user.findUnique({ where: { id: session.userId } });
+}

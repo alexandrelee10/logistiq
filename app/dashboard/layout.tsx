@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { SESSION_COOKIE_NAME } from "@/app/lib/auth";
+import { getCurrentUser, SESSION_COOKIE_NAME } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
 import DashboardShell from "@/app/components/dashboard/DashboardShell";
 
@@ -21,10 +21,7 @@ export default async function DashboardLayout({
     redirect("/sign-in");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: sessionUserId },
-    select: { firstName: true, lastName: true, email: true, role: true },
-  });
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/sign-in");
