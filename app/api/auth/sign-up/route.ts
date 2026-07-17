@@ -1,11 +1,11 @@
 import { prisma } from "@/app/lib/prisma";
 import { signupSchema } from "@/validations/auth";
+import { slugify } from "@/app/lib/slug";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
 export async function POST(req: Request) {
-
     try {
         const body = await req.json();
         const validation = signupSchema.safeParse(body);
@@ -15,13 +15,21 @@ export async function POST(req: Request) {
                 { message: "Fill in required fields", error: validation.error.flatten() },
                 { status: 400 }
             );
-        };
+        }
 
-        const { firstName, lastName, phoneNumber, email, role, password } = validation.data;
+        const {
+            firstName,
+            lastName,
+            phoneNumber,
+            email,
+            role,
+            password,
+            companyName,
+        } = validation.data;
 
         const existingUser = await prisma.user.findFirst({
             where: { OR: [{ email }, { phoneNumber }] },
-            select: { email: true, phoneNumber: true }
+            select: { email: true, phoneNumber: true },
         });
 
         if (existingUser) {
@@ -35,22 +43,35 @@ export async function POST(req: Request) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await prisma.user.create({
-            data: {
-                id: randomUUID(),
-                firstName: firstName,
-                lastName: lastName,
-                phoneNumber: phoneNumber,
-                email: email,
-                password: hashedPassword,
-                role: role
-            },
+        const user = await prisma.$transaction(async (tx) => {
+            // Every sign-up creates a brand new organization — there's no
+            // invite/join-existing-org flow (and no Invite model) in the schema.
+            const org = await tx.organization.create({
+                data: {
+                    id: randomUUID(),
+                    name: companyName,
+                    slug: slugify(companyName),
+                },
+            });
+
+            return tx.user.create({
+                data: {
+                    id: randomUUID(),
+                    firstName,
+                    lastName,
+                    phoneNumber,
+                    email,
+                    password: hashedPassword,
+                    role,
+                    organizationId: org.id,
+                },
+            });
         });
 
         return NextResponse.json(
-            { message: "Account successfully created" },
+            { message: "Account successfully created", userId: user.id },
             { status: 201 }
-        )
+        );
     } catch (error) {
         // Prisma unique constraint race condition (two signups at once)
         if (

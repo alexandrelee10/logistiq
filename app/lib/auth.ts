@@ -1,13 +1,14 @@
 import { cookies } from "next/headers";
-import { getValidSession, verifySessionToken } from "./jwt";
+import { verifySessionToken } from "./jwt";
+import { getValidSession } from "./session";
 import { prisma } from "./prisma";
 
 
 const SESSION_COOKIE_NAME = "logistiq_session";
 
-// Authentication Check 
+// Authentication Check
 export async function isAuthenticated(): Promise<boolean> {
-  return Boolean(getCurrentUser());
+  return Boolean(await getCurrentUser());
 }
 
 export { SESSION_COOKIE_NAME };

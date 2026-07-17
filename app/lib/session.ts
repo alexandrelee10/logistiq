@@ -1,6 +1,6 @@
 import { prisma } from "./prisma"
 
-const SESSION_LIFETIME_MS = 1000 * 60 * 60 * 24 // 24 hours
+const SESSION_LIFETIME_MS = 1000 * 60 * 60 * 24 * 30 // 30 days — must match the sign-in cookie/JWT expiry
 
 // Create a new session for a user
 export async function createSession(userId: string) {

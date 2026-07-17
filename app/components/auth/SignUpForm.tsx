@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, ChevronDown } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, ChevronDown, Building2 } from "lucide-react";
 import AuthLayout from "./AuthLayout";
 
 type Role = "ADMIN" | "MANAGER" | "WAREHOUSE_STAFF" | "PURCHASING" | "ACCOUNTING" | "VIEWER";
@@ -15,6 +15,7 @@ type SignUpFormData = {
     email: string,
     password: string,
     role: Role,
+    companyName: string
 }
 
 const ROLE_OPTIONS: { value: Role; label: string }[] = [
@@ -37,7 +38,8 @@ export default function SignUp() {
         phoneNumber: "",
         email: "",
         password: "",
-        role: "ADMIN" // DEFAULT
+        role: "ADMIN",
+        companyName: "" // DEFAULT
     });
 
     const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
@@ -88,7 +90,7 @@ export default function SignUp() {
                 return;
             }
 
-            router.push("/dashboard");
+            router.push("/sign-in?created=1");
         } catch {
             setServerMessage("Something went wrong. Please try again.");
         } finally {
@@ -138,6 +140,21 @@ export default function SignUp() {
                         />
                     </Field>
                 </div>
+
+                <Field label="Company name" error={fieldErrors.companyName}>
+                    <div className="relative">
+                        <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/35" />
+                        <input
+                            name="companyName"
+                            value={form.companyName}
+                            placeholder="Acme Inc."
+                            onChange={handleChange}
+                            autoComplete="organization"
+                            required
+                            className="w-full border border-black/15 pl-9 pr-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent"
+                        />
+                    </div>
+                </Field>
 
                 <Field label="Email" error={fieldErrors.email}>
                     <div className="relative">

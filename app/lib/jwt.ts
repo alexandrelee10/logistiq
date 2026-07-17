@@ -4,7 +4,6 @@
  */
 
 import jwt from "jsonwebtoken"
-import { prisma } from "./prisma";
 
 const SESSION_SECRET: string = process.env.SESSION_SECRET ?? (() => {
     throw new Error("SESSION_SECRET is not set — check your .env file");
@@ -23,26 +22,6 @@ export function verifySessionToken(token: string): { sid: string } | null {
     }
 }
 
-export async function getValidSession(sessionId: string) {
-    const session = await prisma.session.findUnique(
-        { where: { id: sessionId} } // retrieves id and gets the sessionId of the user
-    );
-    
-    if (!session) { return null; };
-
-    if (session.expiresAt < new Date()) {
-        await prisma.session.delete( {where : {id: sessionId }}).catch(() => {});
-        return null;
-    }
-    return session;
-}
-export async function deleteSession(sessionId: string) {
-    await prisma.session.delete({ where: { id: sessionId } }).catch(() => {});
-}
-
-export async function deleteAllSessionsForUser(userId: string) {
-    await prisma.session.deleteMany( { where: { userId }});
-}
-
-
+// Session CRUD (create/read/delete) lives in ./session — kept here previously as a
+// duplicate, which risked the two copies drifting out of sync.
 

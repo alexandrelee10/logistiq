@@ -14,6 +14,8 @@ export const signupSchema = z.object({
     "ACCOUNTING",
     "VIEWER",
   ]),
+  companyName: z.string().min(1, "Company name is required"),
+  
 });
 
 export const signinSchema = z.object({
