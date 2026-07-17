@@ -24,27 +24,40 @@ enum USERROLE {
 }
 
 model User {
-  id String @unique @id
-  firstName String
-  lastName String
-  email String @unique
-  phoneNumber String @unique
-  password String 
-  role USERROLE
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String   @unique
+  phoneNumber String   @unique
+  password    String
+  role        USERROLE
 
-  image String?
+  image     String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   sessions Session[]
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
 model Session {
-  id String @id @default(cuid())
+  id     String @id @default(cuid())
   userId String
 
-  user User @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   expiresAt DateTime
   createdAt DateTime @default(now())
+}
+
+model Organization {
+  id   String @id @default(cuid())
+  name String
+  slug String @unique
+
+  createdAt DateTime @default(now())
+
+  users User[]
 }
