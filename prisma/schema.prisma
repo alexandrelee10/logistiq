@@ -23,6 +23,13 @@ enum USERROLE {
   VIEWER
 }
 
+enum PurchaseOrderStatus {
+  awaiting_approval
+  approved
+  cancelled
+  missing
+}
+
 model User {
   id          String   @id @default(cuid())
   firstName   String
@@ -64,6 +71,10 @@ model Organization {
   products Product[]
 
   warehouses Warehouse[]
+
+  suppliers Supplier[]
+
+  purchaseOrders PurchaseOrder[]
 }
 
 model Product {
@@ -83,6 +94,7 @@ model Product {
   @@unique([organizationId, sku])
   inventoryItems InventoryItem[]
   inventoryRecords InventoryRecord[]
+  purchaseOrderLines PurchaseOrderLine[]
 }
 
 model Warehouse {
@@ -132,4 +144,51 @@ model InventoryRecord {
   userId String?
 
   createdAt DateTime @default(now())
+}
+
+model Supplier {
+  id String @id @default(cuid())
+
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id])
+
+  name String
+  email String?
+  phone String?
+
+  createdAt DateTime @default(now())
+
+
+  purchaseOrders PurchaseOrder[]
+}
+
+model PurchaseOrder {
+  id String @id @default(cuid())
+  
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id])
+  
+  supplierId String
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+ 
+  status PurchaseOrderStatus @default(awaiting_approval)
+ 
+  createdAt DateTime @default(now())
+  
+  purchaseOrderLines PurchaseOrderLine[]
+}
+
+// Each order line in a purchase order
+model PurchaseOrderLine {
+  id String @id @default(cuid())
+
+  purchaseOrderId String
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+
+  quantityOrdered Int
+  quantityReceived Int @default(0)
+  unitCost Decimal? @db.Decimal(10,2) // store an exact decimal number with up to 10 total digits, 2 of which are after the decimal point
 }

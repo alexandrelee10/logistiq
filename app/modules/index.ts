@@ -2,3 +2,4 @@
 import "./products/product"
 import "./warehouses/warehouse"
 import "./inventory/inventory"
+import "./purchasing/purchasing"
