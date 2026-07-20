@@ -4,30 +4,34 @@ import { register } from "@/app/lib/registry";
 
 
 register("adjustStock", async(data,ctx) => {
-    const { productId, warehouseId, delta } = data;
+    const { productId, warehouseId, delta } = data; // delta is the amount we're changing something by
 
-    if (!productId || warehouseId || typeof delta !== "number" || delta === 0) {
+    // Validation check
+    if (!productId || !warehouseId || typeof delta !== "number" || delta === 0) {
         return {
             status: 400,
             body: { error: "productId, warehouseId, and a non-zero numeric delta are required." },
         };
     }
 
+    // Ensure the product and warehouse exists. Using Promise.all() I did them together
     const [product, warehouse] = await Promise.all([
         prisma.product.findFirst({ where: { id: productId, organizationId: ctx.organizationId } }),
         prisma.warehouse.findFirst({ where: { id: warehouseId, organizationId: ctx.organizationId } }),
     ]);
 
+    // Checking whether or not they exist and handling it
     if (!product || !warehouse) {
         return { status: 404, body: { error: "Product or warehouse not found" } };
     };
 
-    const existing = await prisma.inventoryItem.findUnique({
+    const existingInventory = await prisma.inventoryItem.findUnique({
         where: { productId_warehouseId: { productId, warehouseId } }
     });
 
-    const nextQuantity = (existing?.quantity ?? 0) + delta;
+    const nextQuantity = (existingInventory?.quantity ?? 0) + delta; // Calculate next quantity
 
+    // Negative inventory prevention
     if (nextQuantity < 0) {
         return { status: 400, body: { error: "That would take stock below zero." } }; 
     }
@@ -72,13 +76,3 @@ register("lowStock", async (_data, ctx) => {
 
     return { status: 200, body: { products: lowStock } };
 })
-
-
-/** Explanation:
- * 
- * \----- Adjust Stock ----/
- * 
- * 
- * 
- * 
- */
