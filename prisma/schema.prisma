@@ -28,6 +28,10 @@ enum PurchaseOrderStatus {
   approved
   cancelled
   missing
+  draft
+  submitted
+  received
+  partially_received
 }
 
 model User {
