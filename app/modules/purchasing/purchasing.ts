@@ -100,7 +100,7 @@ register("listPurchaseOrders", async (data, ctx) => {
             organizationId: ctx.organizationId,
             ...(status ? { status} : {})
         },
-        include: { supplier: true, lines: { include: { product: true} } },
+        include: { supplier: true, purchaseOrderLines: { include: { product: true} } },
         orderBy: { createdAt: "desc"}
     });
 
@@ -199,7 +199,7 @@ register("receivePurchaseOrder", async (data, ctx) => {
         return tx.purchaseOrder.update({
             where: { id: purchaseOrderId },
             data: { status: fullyReceived ? "received" : "partially_received" },
-            include: { lines: true, supplier: true },
+            include: { purchaseOrderLines: true, supplier: true },
         });
     });
 

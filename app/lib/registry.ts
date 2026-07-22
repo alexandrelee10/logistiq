@@ -9,9 +9,15 @@ export interface RequestContext {
 
 const REGISTRY = new Map<string, Handler>();
 
-// Call once per action at module load time
+// Call once per action at module load time.
+// The duplicate check only runs in production: in dev, Next's hot-reload
+// legitimately re-executes a module's register() calls whenever you save a
+// file, which would otherwise throw here on every save even though nothing
+// is actually wrong. In production the server only starts once, so a real
+// duplicate name (e.g. two files registering the same action by mistake)
+// still gets caught.
 export function register(name: string, handler: Handler) {
-    if (REGISTRY.has(name)) {
+    if (REGISTRY.has(name) && process.env.NODE_ENV === "production") {
         throw new Error(`Duplicate handler registered for action "${name}"`);
     }
     REGISTRY.set(name, handler);
