@@ -182,7 +182,8 @@ model PurchaseOrder {
   
   supplierId String
   supplier Supplier @relation(fields: [supplierId], references: [id])
- 
+  poNumber String @unique
+
   status PurchaseOrderStatus @default(awaiting_approval)
  
   createdAt DateTime @default(now())
@@ -199,8 +200,6 @@ model PurchaseOrderLine {
 
   productId String
   product Product @relation(fields: [productId], references: [id])
-
-  poNumber String? @unique
 
   quantityOrdered Int
   quantityReceived Int @default(0)
@@ -232,12 +231,12 @@ model SalesOrder {
 
   customerId String
   customer Customer @relation(fields: [customerId], references: [id])
+  soNumber String @unique
 
   status String @default("draft")
   dueDate DateTime?
   amountPaid Decimal @default(0) @db.Decimal(10,2)
 
-  soNumber String? @unique
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

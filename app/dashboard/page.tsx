@@ -116,7 +116,12 @@ export default async function DashboardPage() {
   const reorderItems = lowStockRes.body.products as { id: string; name: string; sku: string }[];
 
   const openPurchaseOrders = (
-    purchaseOrdersRes.body.purchaseOrders as { id: string; status: string; supplier: { name: string } }[]
+    purchaseOrdersRes.body.purchaseOrders as {
+      id: string;
+      poNumber: string;
+      status: string;
+      supplier: { name: string };
+    }[]
   ).filter((po) => po.status !== "received");
 
   const topProducts = topProductsRes.body.products as { id: string; name: string; sku: string; unitsSold: number }[];
@@ -132,6 +137,7 @@ export default async function DashboardPage() {
 
   const unpaidOrders = unpaidRes.body.salesOrders as {
     id: string;
+    soNumber: string;
     dueDate: Date | string | null;
     balanceDue: number;
     customer: { name: string };
@@ -220,7 +226,7 @@ export default async function DashboardPage() {
             {openPurchaseOrders.map((po) => (
               <div key={po.id} className="flex items-center justify-between gap-3 py-2.5">
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{`PO-${po.id.slice(-6).toUpperCase()}`}</p>
+                  <p className="text-sm font-semibold text-foreground">{po.poNumber}</p>
                   <p className="text-xs text-slate-400 truncate">{po.supplier.name}</p>
                 </div>
                 <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${PO_STATUS_STYLES[po.status]}`}>
@@ -312,7 +318,7 @@ export default async function DashboardPage() {
                 return (
                   <tr key={o.id} className="border-b border-slate-50 last:border-b-0">
                     <td className="px-6 py-3">
-                      <p className="font-semibold text-foreground">{`SO-${o.id.slice(-6).toUpperCase()}`}</p>
+                      <p className="font-semibold text-foreground">{o.soNumber}</p>
                       <p className="text-xs text-slate-400">{o.customer.name}</p>
                     </td>
                     <td className={`px-4 py-3 text-xs font-semibold ${overdue ? "text-red-500" : "text-slate-400"}`}>
