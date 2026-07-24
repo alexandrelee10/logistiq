@@ -7,7 +7,7 @@ async function backfill() {
     for (const org of organizations) {
         // Purchase Orders 
         const purchaseOrders = await prisma.purchaseOrder.findMany({
-            where: { organizationId: org.id, poNumber: null },
+            where: { organizationId: org.id, poNumber: "" },
             orderBy: { createdAt: "asc" },
         });
         for (const po of purchaseOrders) {
@@ -21,7 +21,7 @@ async function backfill() {
 
         // Sales Orders 
         const salesOrders = await prisma.salesOrder.findMany({
-            where: { organizationId: org.id, soNumber: null },
+            where: { organizationId: org.id, soNumber: "" },
             orderBy: { createdAt: "asc" },
         });
         for (const so of salesOrders) {
@@ -36,12 +36,13 @@ async function backfill() {
 
     console.log("Backfill complete.");
 }
-
 backfill()
-    .then(() => process.exit(0))
-    .catch((err) => { // Testing
-        console.error(err);
-        process.exit(1);
+    .catch((error) => {
+        console.error("Backfill failed:", error);
+        process.exitCode = 1;
+    })
+    .finally(async () => {
+        await prisma.$disconnect();
     });
 
 

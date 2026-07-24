@@ -1,10 +1,13 @@
 // Maps action name to the function that handles it. Added two small helpers to add to it and read it if need be
 
+import { USERROLE } from "@/generated/prisma/enums";
+
 type Handler = (data: Record<string, any>, ctx: RequestContext) => Promise<any>
 
 export interface RequestContext {
     userId: string,
-    organizationId: string
+    organizationId: string,
+    role: USERROLE
 }
 
 const REGISTRY = new Map<string, Handler>();

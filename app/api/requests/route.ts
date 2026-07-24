@@ -17,6 +17,7 @@ export async function POST(req: Request) {
         const result = await orchestrate(data, {
             userId: user.id,
             organizationId: user.organizationId,
+            role: user.role
         });
 
         return NextResponse.json(result.body ?? result, { status: result.status ?? 200 });

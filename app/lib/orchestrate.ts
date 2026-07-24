@@ -1,3 +1,4 @@
+import { isActionAllowed } from "./permission";
 import { getHandler } from "./registry";
 import type {  RequestContext } from "./registry";
 
@@ -8,6 +9,8 @@ export async function orchestrate(data: Record<string, any>, ctx: RequestContext
     if (!handler) {
         return { status: 400, body: { error: `Unknown action: ${action} `} };
     }
+    // Permission check 
+    if (!isActionAllowed(action, ctx.role))
 
     return handler(data, ctx);
 }
