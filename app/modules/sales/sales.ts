@@ -1,4 +1,5 @@
 import { applyStockDelta, StockBelowZeroError } from "@/app/lib/inventory";
+import { nextOrderNumber } from "@/app/lib/order-number";
 import { prisma } from "@/app/lib/prisma";
 import { register } from "@/app/lib/registry";
 import { Prisma } from "@/generated/prisma/client";
@@ -72,9 +73,11 @@ register("createSalesOrder", async(data , ctx) => {
     }
 
     const salesOrder = await prisma.$transaction(async (tx) => {
+        const soNumber = await nextOrderNumber(tx, ctx.organizationId, "SO");
         const so = await tx.salesOrder.create({
             data: {
                 organizationId: ctx.organizationId,
+                soNumber,
                 customerId,
                 status: "draft",
                 dueDate: dueDate ? new Date(dueDate) : null,

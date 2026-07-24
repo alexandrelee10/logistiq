@@ -1,4 +1,5 @@
 import { applyStockDelta } from "@/app/lib/inventory";
+import { nextOrderNumber } from "@/app/lib/order-number";
 import { prisma } from "@/app/lib/prisma";
 import { register } from "@/app/lib/registry";
 
@@ -69,24 +70,31 @@ register("createPurchaseOrder", async (data, ctx) => {
     }
 
     const purchaseOrder = await prisma.$transaction(async (tx) => {
-        const po = await tx.purchaseOrder.create({
-            data: { organizationId: ctx.organizationId, supplierId, status: "awaiting_approval" },
-        });
+    const poNumber = await nextOrderNumber(tx, ctx.organizationId, "PO");
 
-        await tx.purchaseOrderLine.createMany({
-            data: lines.map((l) => ({
-                purchaseOrderId: po.id,
-                productId: l.productId,
-                quantityOrdered: l.quantity,
-                unitCost: l.unitCost ?? null,
-            })),
-        });
-
-        return tx.purchaseOrder.findUniqueOrThrow({
-            where: { id: po.id },
-            include: { purchaseOrderLines: true, supplier: true },
-        });
+    const po = await tx.purchaseOrder.create({
+        data: {
+            organizationId: ctx.organizationId,
+            poNumber,                                                     
+            supplierId,
+            status: "awaiting_approval",
+        },
     });
+
+    await tx.purchaseOrderLine.createMany({
+        data: lines.map((l) => ({
+            purchaseOrderId: po.id,
+            productId: l.productId,
+            quantityOrdered: l.quantity,
+            unitCost: l.unitCost ?? null,
+        })),
+    });
+
+    return tx.purchaseOrder.findUniqueOrThrow({
+        where: { id: po.id },
+        include: { purchaseOrderLines: true, supplier: true },
+    });
+});
 
     return { status: 201, body: { purchaseOrder } };
 });

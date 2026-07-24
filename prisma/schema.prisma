@@ -84,6 +84,8 @@ model Organization {
   customers Customer[]
 
   salesOrders SalesOrder[]
+
+  orderSequences OrderSequence[]
 }
 
 model Product {
@@ -198,6 +200,8 @@ model PurchaseOrderLine {
   productId String
   product Product @relation(fields: [productId], references: [id])
 
+  poNumber String? @unique
+
   quantityOrdered Int
   quantityReceived Int @default(0)
   unitCost Decimal? @db.Decimal(10,2) // store an exact decimal number with up to 10 total digits, 2 of which are after the decimal point
@@ -233,6 +237,8 @@ model SalesOrder {
   dueDate DateTime?
   amountPaid Decimal @default(0) @db.Decimal(10,2)
 
+  soNumber String? @unique
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -251,4 +257,16 @@ model SalesOrderLine {
   quantityOrdered Int
   quantityFufilled Int @default(0)
   unitPrice Decimal @db.Decimal(10,2)
+}
+
+model OrderSequence {
+  id String @id @default(cuid())
+  
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  type String
+  lastNumber Int @default(1000)
+
+  @@unique([organizationId, type])
 }
