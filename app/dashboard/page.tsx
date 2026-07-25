@@ -95,7 +95,7 @@ export default async function DashboardPage() {
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
-  const ctx = { userId: user.id, organizationId: user.organizationId };
+  const ctx = { userId: user.id, organizationId: user.organizationId, role: user.role };
 
   const [lowStockRes, purchaseOrdersRes, topProductsRes, topCustomersRes, revenueRes, unpaidRes, activityRes, productsRes] =
     await Promise.all([

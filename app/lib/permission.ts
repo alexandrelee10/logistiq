@@ -64,6 +64,10 @@ const ACTION_ROLES: Record<string, USERROLE[]> = {
 export function isActionAllowed(action: string, role: USERROLE): boolean {
     const allowed =ACTION_ROLES[action];
 
+    if(!allowed) {
+      return ALWAYS_ALLOWED.includes(role)
+    }
+
     return allowed.includes(role);
 }
 

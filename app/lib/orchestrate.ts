@@ -10,7 +10,12 @@ export async function orchestrate(data: Record<string, any>, ctx: RequestContext
         return { status: 400, body: { error: `Unknown action: ${action} `} };
     }
     // Permission check 
-    if (!isActionAllowed(action, ctx.role))
+    if (!isActionAllowed(action, ctx.role)) {
+        return {
+            status: 403,
+            body: { error: `Your role (${ctx.role}) is not permitted to perform "${action}".`}
+        }
+    }
 
     return handler(data, ctx);
 }
