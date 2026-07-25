@@ -212,7 +212,7 @@ register("receivePurchaseOrder", async (data, ctx) => {
     return { status: 200, body: { purchaseOrder } };
 });
 
-// Approve purchase orders
+// Approve purchase orders 
 register("approvePurchaseOrder", async (data , ctx) => {
     const { purchaseOrderId } = data;
 
@@ -242,6 +242,7 @@ register("approvePurchaseOrder", async (data , ctx) => {
     return { status: 200, body: { purchaseOrder } };
 });
 
+// Cancel purchase order
 register("cancelPurchaseOrder", async (data , ctx) => {
     const { purchaseOrderId } = data;
 
