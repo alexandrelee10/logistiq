@@ -27,7 +27,6 @@ enum PurchaseOrderStatus {
   awaiting_approval
   approved
   cancelled
-  missing
   draft
   submitted
   received

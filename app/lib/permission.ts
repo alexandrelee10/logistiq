@@ -39,6 +39,8 @@ const ACTION_ROLES: Record<string, USERROLE[]> = {
   ],
   submitPurchaseOrder: [...ALWAYS_ALLOWED, "PURCHASING"],
   receivePurchaseOrder: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF"],
+  approvePurchaseOrder: [...ALWAYS_ALLOWED],
+  cancelPurchaseOrder: [...ALWAYS_ALLOWED, "PURCHASING"],
 
   // Sales
   createCustomer: [...ALWAYS_ALLOWED, "ACCOUNTING"],

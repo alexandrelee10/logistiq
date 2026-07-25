@@ -99,7 +99,6 @@ register("createPurchaseOrder", async (data, ctx) => {
     return { status: 201, body: { purchaseOrder } };
 });
 
-
 register("listPurchaseOrders", async (data, ctx) => {
     const { status } = data;
 
@@ -115,6 +114,7 @@ register("listPurchaseOrders", async (data, ctx) => {
     return { status: 200, body: { purchaseOrders } };
 });
 
+// Submit purchase order
 register("submitPurchaseOrder", async (data , ctx) => {
     const { purchaseOrderId } = data;
 
@@ -125,7 +125,7 @@ register("submitPurchaseOrder", async (data , ctx) => {
         return { status: 400, body: { error: "Purchase order not found."}}
     }
 
-    if (po.status !== "draft") {
+    if (po.status !== "approved") {
         return { status: 400, body: { error: `Cannot submit a purchase order with status "${po.status}".`} };
     }
 
@@ -137,7 +137,7 @@ register("submitPurchaseOrder", async (data , ctx) => {
     return { status: 200, body: { purchaseOrder } };
 });
 
-
+// Receive purchase order
 register("receivePurchaseOrder", async (data, ctx) => {
     const { purchaseOrderId, warehouseId, receipts } = data;
 
@@ -158,11 +158,9 @@ register("receivePurchaseOrder", async (data, ctx) => {
     if (!po || !warehouse) {
         return { status: 404, body: { error: "Purchase order or warehouse not found." } };
     }
-    if (po.status === "draft") {
-        return { status: 400, body: { error: "Submit this purchase order before receiving it." } };
-    }
-    if (po.status === "received") {
-        return { status: 400, body: { error: "This purchase order has already been fully received." } };
+    // Ensures now that the purchase order was submitted
+    if (po.status !== "submitted" && po.status !== "partially_received") {
+        return { status: 400, body: { error: `Cannot receive a purchase order with status "${po.status}".`} };
     }
 
     // Validate every receipt against its line *before* writing anything.
@@ -213,4 +211,70 @@ register("receivePurchaseOrder", async (data, ctx) => {
 
     return { status: 200, body: { purchaseOrder } };
 });
+
+// Approve purchase orders
+register("approvePurchaseOrder", async (data , ctx) => {
+    const { purchaseOrderId } = data;
+
+    const po = await prisma.purchaseOrder.findFirst({
+        where: { id: purchaseOrderId ,organizationId: ctx.organizationId }
+    });
+
+    if (!po) {
+        return {
+            status: 400,
+            body: { error: "Purchase order not found."}
+        }
+    }
+
+    if (po.status !== "awaiting_approval") {
+        return {
+            status: 400,
+            body: { error: `Cannot approve a purchase order with status "${po.status}".`}
+        }
+    }
+
+    const purchaseOrder = await prisma.purchaseOrder.update({
+        where: { id: purchaseOrderId },
+        data: { status: "approved" },
+    })
+
+    return { status: 200, body: { purchaseOrder } };
+});
+
+register("cancelPurchaseOrder", async (data , ctx) => {
+    const { purchaseOrderId } = data;
+
+    const po = await prisma.purchaseOrder.findFirst({
+        where: { id: purchaseOrderId, organizationId: ctx.organizationId },
+    });
+    
+    if (!po) {
+        return {
+            status: 400,
+            body: { error: "Purchase order not found" },
+        }
+    };
+
+    if ( po.status === "received" ||po.status === "partially_received" ) {
+        return {
+            status: 400,
+            body: { error: "Cannot cancel a purchase order that has already received stock." },
+        };
+    }
+
+    if (po.status === "cancelled") {
+        return {
+            status: 400,
+            body: { error: "This purchase order is already cancelled. " },
+        }
+    }
+
+    const purchaseOrder = await prisma.purchaseOrder.update({
+        where: { id: purchaseOrderId },
+        data: { status: "cancelled" }
+    });
+
+    return { status: 200, body: { purchaseOrder } };
+})
 
