@@ -50,6 +50,7 @@ register("recordPayment", async (data, ctx) => {
     return { status: 200, body: { salesOrder } };
 });
 
+// Refund payment --- 569ms response time 
 register("refundPayment", async (data , ctx) => {
     const { salesOrderId, amount, method } = data;
 
