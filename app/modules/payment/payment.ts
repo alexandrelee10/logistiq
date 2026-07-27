@@ -82,7 +82,7 @@ register("refundPayment", async (data , ctx) => {
     const newAmountPaid = so.amountPaid.minus(amount);
 
     const salesOrder = await prisma.$transaction(async (tx) => {
-        tx.payment.create({
+        await tx.payment.create({
             data: {
                 salesOrderId,
                 amount: new Prisma.Decimal(amount).negated(),
@@ -97,5 +97,5 @@ register("refundPayment", async (data , ctx) => {
         });
     });
 
-    return { staus: 200, body: { salesOrder } };
+    return { status: 200, body: { salesOrder } };
 })

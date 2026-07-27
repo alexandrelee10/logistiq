@@ -296,14 +296,14 @@ register("updatePurchaseOrderPurchasingLine", async (data , ctx) => {
         };
     }
 
-    if (quantity !== undefined && (typeof quantity !== "number" || quantity <=0)) {
+    if (quantity !== undefined && (typeof quantity !== "number" || quantity <= 0)) {
         return {
             status: 400,
             body: { error: "Quantity must be a positive number" },
         };
     }
 
-    if (unitPrice !== undefined && (typeof unitPrice !== "number" || quantity <= 0)) {
+    if (unitPrice !== undefined && (typeof unitPrice !== "number" || unitPrice < 0)) {
         return {
             status: 400,
             body: { error: "Unit price must be a non-negative." },
@@ -322,10 +322,10 @@ register("updatePurchaseOrderPurchasingLine", async (data , ctx) => {
         };
     }
 
-    if (po.status !== "draft") {
+    if (po.status !== "awaiting_approval") {
         return {
             status: 400,
-            body: { error: `Cannot edit lines on a sales order with status "${po.status}". Only draft orders can be edited.`}
+            body: { error: `Cannot edit lines on a purchase order with status "${po.status}". Only draft orders can be edited.`}
         };
     }
 

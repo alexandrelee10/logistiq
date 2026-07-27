@@ -16,7 +16,7 @@ register("createInvite", async (data , ctx) => {
     }
 
     const existingUser = await prisma.user.findFirst({
-        where: { email, organizationId: ctx.organizationId },
+        where: { email },
     });
     
     // Enusre user exist and is available for an invite
@@ -51,14 +51,19 @@ register("createInvite", async (data , ctx) => {
 });
 
 // List all invites 
-register("listInvites", async (_data , ctx) => {
-   const invites = await prisma.invite.findMany({
-    where: { organizationId: ctx.organizationId, status: "pending" },
-    orderBy: { createdAt: "desc" },
-   });
-   
-   return { status: 200, body: { invites } };
-})
+register("listInvites", async (data, ctx) => {
+    const { status } = data;
+
+    const invites = await prisma.invite.findMany({
+        where: {
+            organizationId: ctx.organizationId,
+            ...(status ? { status } : {}),
+        },
+        orderBy: { createdAt: "desc" },
+    });
+
+    return { status: 200, body: { invites } };
+});
 
 register("revokeInvite", async(data , ctx) => {
     const { inviteId } = data;
