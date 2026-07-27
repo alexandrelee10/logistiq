@@ -277,5 +277,77 @@ register("cancelPurchaseOrder", async (data , ctx) => {
     });
 
     return { status: 200, body: { purchaseOrder } };
+});
+
+register("updatePurchaseOrderPurchasingLine", async (data , ctx) => {
+    const { purchaseOrderId, lineId, quantity, unitPrice } = data;
+
+    if (!purchaseOrderId || !lineId) {
+        return {
+            status: 400,
+            body: { error: "Purchase order or line ID is required. "}
+        };
+    } 
+
+    if (quantity === undefined && unitPrice === undefined) {
+        return {
+            status: 400,
+            body: { error: "Provide a new quantity or unit price. " },
+        };
+    }
+
+    if (quantity !== undefined && (typeof quantity !== "number" || quantity <=0)) {
+        return {
+            status: 400,
+            body: { error: "Quantity must be a positive number" },
+        };
+    }
+
+    if (unitPrice !== undefined && (typeof unitPrice !== "number" || quantity <= 0)) {
+        return {
+            status: 400,
+            body: { error: "Unit price must be a non-negative." },
+        };
+    }
+
+    const po = await prisma.purchaseOrder.findFirst({
+        where: { id: purchaseOrderId, organizationId: ctx.organizationId },
+        include: { purchaseOrderLines: true },
+    });
+
+    if (!po) {
+        return {
+            status: 404,
+            body: { error: "Purchase order not found" },
+        };
+    }
+
+    if (po.status !== "draft") {
+        return {
+            status: 400,
+            body: { error: `Cannot edit lines on a sales order with status "${po.status}". Only draft orders can be edited.`}
+        };
+    }
+
+    const line = await po.purchaseOrderLines.find((l) => l.id === lineId);
+
+    if (!line) {
+        return {
+            status: 404,
+            body: { error: "Line not found on this purchase order" },
+        };
+    }
+
+    const purchaseOrderLine = await prisma.purchaseOrderLine.update({
+        where: { id: lineId },
+                data: {
+            ...(quantity !== undefined ? { quantityOrdered: quantity } : {}),
+            ...(unitPrice !== undefined ? { unitPrice } : {}),
+        },
+    });
+
+    return { status: 200, body: { purchaseOrderLine } };
+
+
 })
 
