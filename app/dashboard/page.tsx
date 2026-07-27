@@ -53,6 +53,18 @@ function activityLabel(delta: number): string {
   return delta > 0 ? "Restocked" : "Adjusted";
 }
 
+// orchestrate() can come back with a non-200 status (403 from the
+// permission check in orchestrate.ts, or a 500 from a handler error) — in
+// that case `result.body` won't have the field the caller expects at all.
+// Rather than let a permission gap or a transient failure blow up the whole
+// page (an undefined array reaching .map()/.filter() below), fall back to
+// an empty array and let that one card render empty instead of crashing.
+function bodyArray<T>(result: { status: number; body: any }, key: string): T[] {
+  if (result.status !== 200) return [];
+  const value = result.body?.[key];
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
 function CardHeader({ icon: Icon, count, label, action }: { icon: LucideIcon; count?: string; label: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-start justify-between mb-4">
@@ -111,47 +123,49 @@ export default async function DashboardPage() {
 
   // orchestrate() returns Promise<any> (it dispatches to whichever handler
   // matched the action name, so its return type can't be known statically) —
-  // these casts give the JSX below real shapes to work with instead of `any`
-  // leaking through into every .map()/.filter() callback below.
-  const reorderItems = lowStockRes.body.products as { id: string; name: string; sku: string }[];
+  // bodyArray() gives the JSX below real shapes to work with instead of
+  // `any` (or undefined, on a non-200 response) leaking through into every
+  // .map()/.filter() callback below.
+  const reorderItems = bodyArray<{ id: string; name: string; sku: string }>(lowStockRes, "products");
 
-  const openPurchaseOrders = (
-    purchaseOrdersRes.body.purchaseOrders as {
-      id: string;
-      poNumber: string;
-      status: string;
-      supplier: { name: string };
-    }[]
-  ).filter((po) => po.status !== "received");
+  const openPurchaseOrders = bodyArray<{
+    id: string;
+    poNumber: string;
+    status: string;
+    supplier: { name: string };
+  }>(purchaseOrdersRes, "purchaseOrders").filter((po) => po.status !== "received");
 
-  const topProducts = topProductsRes.body.products as { id: string; name: string; sku: string; unitsSold: number }[];
+  const topProducts = bodyArray<{ id: string; name: string; sku: string; unitsSold: number }>(
+    topProductsRes,
+    "products"
+  );
 
-  const topCustomers = topCustomersRes.body.customers as {
+  const topCustomers = bodyArray<{
     id: string;
     name: string;
     email: string | null;
     totalRevenue: number;
-  }[];
+  }>(topCustomersRes, "customers");
 
-  const revenueSeries = revenueRes.body.series as { date: string; total: number }[];
+  const revenueSeries = bodyArray<{ date: string; total: number }>(revenueRes, "series");
 
-  const unpaidOrders = unpaidRes.body.salesOrders as {
+  const unpaidOrders = bodyArray<{
     id: string;
     soNumber: string;
     dueDate: Date | string | null;
     balanceDue: number;
     customer: { name: string };
-  }[];
+  }>(unpaidRes, "salesOrders");
 
-  const activity = activityRes.body.events as {
+  const activity = bodyArray<{
     id: string;
     delta: number;
     createdAt: Date | string;
     product: { name: string };
     warehouse: { name: string };
-  }[];
+  }>(activityRes, "events");
 
-  const totalSkuCount = (productsRes.body.products as unknown[]).length;
+  const totalSkuCount = bodyArray<unknown>(productsRes, "products").length;
 
   // "kind" (purchase vs. transfer) has no real backing data yet — nothing
   // detects whether another warehouse has spare stock to transfer from
