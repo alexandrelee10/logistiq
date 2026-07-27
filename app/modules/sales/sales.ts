@@ -135,6 +135,7 @@ register("listSalesOrders", async (data, ctx) => {
     return { status: 200, body: { salesOrders: result } };
 });
 
+
 // Confirm Sales Order --- 505ms response time 
 register("confirmSalesOrder", async(data , ctx) => {
     const { salesOrderId } = data;
@@ -158,6 +159,43 @@ register("confirmSalesOrder", async(data , ctx) => {
 
     return { status: 200, body: { salesOrder } };
 });
+
+// Cancel Sales Order --- 111 ms response time
+register("cancelSalesOrder", async(data , ctx) => {
+    const { salesOrderId } = data;
+
+    const so = await prisma.salesOrder.findUnique({
+        where: { id: salesOrderId ,organizationId: ctx.organizationId }
+    })
+
+    if (!so) {
+        return {
+            status: 404,
+            body: { erro: "Sales order not found" },
+        };
+    }
+
+    if (so.status === "partially_fulfilled" || so.status === "fufilled") {
+        return {
+            status: 400,
+            body: { error: "Cannot cancel a sales order that has already been shipped" },
+        };
+    }
+
+    if (so.status === "cancelled") {
+        return {
+            status: 400,
+            body: { error: "Sales order is already cancelled" },
+        };
+    }
+
+    const salesOrder = await prisma.salesOrder.update({
+        where: { id: salesOrderId, organizationId: ctx.organizationId },
+        data: { status: "cancelled" }, 
+    });
+
+    return { status: 200, body: { salesOrder } };
+})
 
 // Fufill Sales Orders --- 1.32s response time 
 register("fulfillSalesOrder", async (data, ctx) => {
@@ -246,39 +284,73 @@ register("fulfillSalesOrder", async (data, ctx) => {
     }
 });
 
-// Record Payments --- 278ms response time
-register("recordPayment", async (data, ctx) => {
-    const { salesOrderId, amount } = data;
+register("updateSalesOrderLine", async (data , ctx) => {
+    const { salesOrderId, lineId, quantity, unitPrice } = data;
 
-    if (!salesOrderId || typeof amount !== "number" || amount <= 0) {
-        return { status: 400, body: { error: "salesOrderId and a positive numeric amount are required." } };
-    }
-
-    const so = await prisma.salesOrder.findFirst({
-        where: { id: salesOrderId, organizationId: ctx.organizationId },
-        include: { salesOrderLines: true },
-    });
-    if (!so) {
-        return { status: 404, body: { error: "Sales order not found." } };
-    }
-
-    const amountTotal = so.salesOrderLines.reduce(
-        (sum, l) => sum.plus(l.unitPrice.times(l.quantityOrdered)),
-        new Prisma.Decimal(0)
-    );
-    const newAmountPaid = so.amountPaid.plus(amount);
-
-    if (newAmountPaid.greaterThan(amountTotal)) {
+    if (!salesOrderId || !lineId) {
         return {
             status: 400,
-            body: { error: `That payment would overpay this order by ${newAmountPaid.minus(amountTotal).toFixed(2)}.` },
+            body: { error: "Sales order or line ID is required." },
         };
     }
 
-    const salesOrder = await prisma.salesOrder.update({
-        where: { id: salesOrderId },
-        data: { amountPaid: newAmountPaid },
+    if (quantity === undefined && unitPrice === undefined) {
+        return {
+            status: 400,
+            body: { error: "Provide a new quantity or unit price" },
+        };
+    }
+
+    if (quantity !== undefined && (typeof quantity !== "number" || quantity <= 0)) {
+        return {
+            status: 400,
+            body: { error: "Quantity must be a positive number" },
+        };
+    } 
+
+    if (unitPrice !== undefined && (typeof unitPrice !== "number" || unitPrice < 0)) {
+        return {
+            status: 400,
+            body: { error: "Unit price must be a non-negative number. " }
+        };
+    }
+
+    const so = await prisma.salesOrder.findFirst({
+        where: { id: salesOrderId, organizationId: ctx.organizationId }, 
+        include: { salesOrderLines: true }
     });
 
-    return { status: 200, body: { salesOrder } };
-});
+    if (!so) {
+        return {
+            status: 404,
+            body: { error: "Sales order not found."}
+        };
+    }
+
+    if (so.status !== "draft") {
+        return {
+            status: 400,
+            body: { error: `Cannot edit lines on a sales order with status "${so.status}". Only draft orders can be edited.`},
+        };
+    }
+
+    const line = await so.salesOrderLines.find((l) => l.id === lineId);
+
+    if (!line) {
+        return {
+            status: 404,
+            body: { error: "Line not found on this sale order. " },
+        };
+    }
+
+
+    const salesOrderLine = await prisma.salesOrderLine.update({
+        where: { id: lineId },
+        data: {
+            ...(quantity !== undefined ? { quantityOrdered: quantity } : {}),
+            ...(unitPrice !== undefined ? { unitPrice } : {}),
+        }
+    });
+
+    return { status: 200, body: { salesOrderLine} };
+})

@@ -241,6 +241,8 @@ model SalesOrder {
   updatedAt DateTime @updatedAt
 
   salesOrderLines SalesOrderLine[]
+
+  payments Payment[]
 }
 
 model SalesOrderLine {
@@ -267,4 +269,17 @@ model OrderSequence {
   lastNumber Int @default(1000)
 
   @@unique([organizationId, type])
+}
+
+model Payment {
+  id String @id @default(cuid())
+
+  salesOrderId String
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+
+  amount Decimal @db.Decimal(10,2)
+  method String?
+  userId String?
+
+  createdAt DateTime @default(now())
 }
