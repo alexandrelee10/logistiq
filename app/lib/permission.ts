@@ -5,7 +5,13 @@ import { USERROLE } from "@/generated/prisma/enums";
 const ALWAYS_ALLOWED: USERROLE[] = ["ADMIN", "MANAGER"];
 
 const ACTION_ROLES: Record<string, USERROLE[]> = {
-  // Products
+
+  // ----- Admin / Manager ----- \\
+  createInvite: [...ALWAYS_ALLOWED],
+  listInvites: [...ALWAYS_ALLOWED],
+  revokeInvite: [...ALWAYS_ALLOWED],  
+  
+  // ----- Products ----- \\
   listProducts: [
     ...ALWAYS_ALLOWED,
     "WAREHOUSE_STAFF",

@@ -43,6 +43,12 @@ enum PaymentMethod {
   other
 }
 
+enum InviteStatus {
+  pending
+  accepted
+  revoked
+}
+
 model User {
   id          String   @id @default(cuid())
   firstName   String
@@ -94,6 +100,8 @@ model Organization {
   salesOrders SalesOrder[]
 
   orderSequences OrderSequence[]
+
+  invites Invite[]
 }
 
 model Product {
@@ -291,4 +299,24 @@ model Payment {
   userId String?
 
   createdAt DateTime @default(now())
+}
+
+model Invite {
+
+id String @id @default(cuid())
+
+organizationId String
+organization Organization @relation(fields: [organizationId], references: [id])
+
+email String
+role USERROLE
+token String @unique
+status InviteStatus 
+
+invitedByUserId String
+expiresAt DateTime
+createdAt DateTime @default(now())
+
+@@unique([organizationId, email]) // Ensures same organization cant spam the same user
+
 }
