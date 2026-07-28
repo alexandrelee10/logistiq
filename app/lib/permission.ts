@@ -30,7 +30,7 @@ const ACTION_ROLES: Record<string, USERROLE[]> = {
 
   // Inventory
   adjustStock: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF"],
-  listInventory: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF", "PURCHASING", "VIEWER"],
+  listInventory: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF", "PURCHASING", "ACCOUNTING", "VIEWER"],
   lowStock: [
     ...ALWAYS_ALLOWED,
     "WAREHOUSE_STAFF",

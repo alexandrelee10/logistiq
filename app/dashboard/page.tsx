@@ -273,22 +273,28 @@ export default async function DashboardPage({
               ))}
             </div>
           </div>
-
+          {/* Top customers */}
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
             <CardHeader icon={Users} label="Top 3 customers" />
             <div className="flex flex-col divide-y divide-slate-50">
-              {topCustomers.map((c, i) => (
-                <div key={c.id} className="flex items-center gap-3 py-2.5">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-foreground truncate">{c.name}</p>
-                    <p className="text-xs text-slate-400">{c.email ?? "No email on file"}</p>
-                  </div>
-                  <p className="text-sm font-bold text-foreground shrink-0">{formatCurrency(c.totalRevenue)}</p>
+              {topCustomers.length === 0 ? (
+                <div className="flex items-center justify-center py-6 text-sm text-slate-400">
+                  No customers yet
                 </div>
-              ))}
+              ) : (
+                topCustomers.map((c, i) => (
+                  <div key={c.id} className="flex items-center gap-3 py-2.5">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">
+                      {i + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-semibold text-foreground truncate">{c.name}</p>
+                      <p className="text-xs text-slate-400">{c.email ?? "No email on file"}</p>
+                    </div>
+                    <p className="text-sm font-bold text-foreground shrink-0">{formatCurrency(c.totalRevenue)}</p>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
@@ -298,13 +304,19 @@ export default async function DashboardPage({
       <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 mt-6">
         <CardHeader icon={BarChart3} count={formatCurrency(totalRevenue)} label="Total sales revenue · last 30 days" />
         <div className="flex items-end gap-1.5 h-36">
-          {revenueBarHeights.map((v, i) => (
-            <div
-              key={i}
-              className={`flex-1 rounded-t-md ${i === revenueBarHeights.length - 1 ? "bg-accent" : "bg-slate-200"}`}
-              style={{ height: `${v}%` }}
-            />
-          ))}
+          {revenueSeries.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
+              No revenue in the last 30 days
+            </div>
+          ) : (
+            revenueBarHeights.map((v, i) => (
+              <div
+                key={i}
+                className={`flex-1 rounded-t-md ${i === revenueBarHeights.length - 1 ? "bg-accent" : "bg-slate-200"}`}
+                style={{ height: `${v}%` }}
+              />
+            ))
+          )}
         </div>
       </div>
 
@@ -323,25 +335,33 @@ export default async function DashboardPage({
           </div>
           <table className="w-full text-sm">
             <tbody>
-              {unpaidOrders.map((o) => {
-                const overdue = o.dueDate ? new Date(o.dueDate) < new Date() : false;
-                const dueLabel = o.dueDate
-                  ? new Date(o.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-                  : "No due date";
+              {unpaidOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-6 py-8 text-center text-sm text-slate-400">
+                    No unpaid sales orders
+                  </td>
+                </tr>
+              ) : (
+                unpaidOrders.map((o) => {
+                  const overdue = o.dueDate ? new Date(o.dueDate) < new Date() : false;
+                  const dueLabel = o.dueDate
+                    ? new Date(o.dueDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                    : "No due date";
 
-                return (
-                  <tr key={o.id} className="border-b border-slate-50 last:border-b-0">
-                    <td className="px-6 py-3">
-                      <p className="font-semibold text-foreground">{o.soNumber}</p>
-                      <p className="text-xs text-slate-400">{o.customer.name}</p>
-                    </td>
-                    <td className={`px-4 py-3 text-xs font-semibold ${overdue ? "text-red-500" : "text-slate-400"}`}>
-                      Due {dueLabel}
-                    </td>
-                    <td className="px-6 py-3 text-right font-bold text-foreground">{formatCurrency(o.balanceDue)}</td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={o.id} className="border-b border-slate-50 last:border-b-0">
+                      <td className="px-6 py-3">
+                        <p className="font-semibold text-foreground">{o.soNumber}</p>
+                        <p className="text-xs text-slate-400">{o.customer.name}</p>
+                      </td>
+                      <td className={`px-4 py-3 text-xs font-semibold ${overdue ? "text-red-500" : "text-slate-400"}`}>
+                        Due {dueLabel}
+                      </td>
+                      <td className="px-6 py-3 text-right font-bold text-foreground">{formatCurrency(o.balanceDue)}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -357,28 +377,36 @@ export default async function DashboardPage({
           </div>
           <table className="w-full text-sm">
             <tbody>
-              {activity.map((row) => {
-                const label = activityLabel(row.delta);
+              {activity.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-sm text-slate-400">
+                    No recent inventory activity
+                  </td>
+                </tr>
+              ) : (
+                activity.map((row) => {
+                  const label = activityLabel(row.delta);
 
-                return (
-                  <tr key={row.id} className="border-b border-slate-50 last:border-b-0">
-                    <td className="px-6 py-3">
-                      <p className="font-semibold text-foreground">{row.product.name}</p>
-                      <p className="text-xs text-slate-400">{row.warehouse.name}</p>
-                    </td>
-                    <td className={`px-4 py-3 font-semibold ${row.delta > 0 ? "text-emerald-600" : "text-slate-600"}`}>
-                      {row.delta > 0 ? "+" : ""}
-                      {row.delta} units
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${ACTIVITY_STATUS_STYLES[label]}`}>
-                        {label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-3 text-right text-xs text-slate-400">{formatRelativeTime(new Date(row.createdAt))}</td>
-                  </tr>
-                );
-              })}
+                  return (
+                    <tr key={row.id} className="border-b border-slate-50 last:border-b-0">
+                      <td className="px-6 py-3">
+                        <p className="font-semibold text-foreground">{row.product.name}</p>
+                        <p className="text-xs text-slate-400">{row.warehouse.name}</p>
+                      </td>
+                      <td className={`px-4 py-3 font-semibold ${row.delta > 0 ? "text-emerald-600" : "text-slate-600"}`}>
+                        {row.delta > 0 ? "+" : ""}
+                        {row.delta} units
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${ACTIVITY_STATUS_STYLES[label]}`}>
+                          {label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-3 text-right text-xs text-slate-400">{formatRelativeTime(new Date(row.createdAt))}</td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
