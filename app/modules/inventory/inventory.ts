@@ -61,7 +61,9 @@ register("listInventory", async (data, ctx) => {
     return { status: 200, body: { items } };
 });
 
-register("lowStock", async (_data, ctx) => {
+register("lowStock", async (data, ctx) => {
+    const { warehouseId } = data;
+    
     const products = await prisma.product.findMany({
         where: { organizationId: ctx.organizationId },
         include: { inventoryItems: true },
@@ -70,7 +72,9 @@ register("lowStock", async (_data, ctx) => {
     const lowStock = products
     .map((p) => ({
         ...p,
-        totalQuantity: p.inventoryItems.reduce((sum, i) => sum + i.quantity, 0),
+        totalQuantity: p.inventoryItems
+            .filter((i) => !warehouseId || i.warehouseId === warehouseId)
+            .reduce((sum, i) => sum + i.quantity, 0),
     }))
     .filter((p) => p.totalQuantity <= p.reorderPoint);
 

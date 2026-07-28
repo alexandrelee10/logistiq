@@ -17,10 +17,10 @@ import { getCurrentUser } from "@/app/lib/auth";
 import { orchestrate } from "../lib/orchestrate";
 import { redirect } from "next/navigation";
 
-// Side-effect import: same one route.ts uses. Populates the action registry
-// for THIS module graph — Next.js compiles this page separately from the
-// API route, so without this import here too, orchestrate() below finds an
-// empty registry and every action "fails" with Unknown action.
+// testing info
+// Email: test@testcenter.com
+// Password: test123456
+
 import "@/app/modules";
 
 function greeting() {
@@ -103,29 +103,30 @@ const ACTIVITY_STATUS_STYLES: Record<string, string> = {
 
 // --- Page -------------------------------------------------------------------
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ warehouse?: string }>;
+}) {
+  const { warehouse: warehouseId } = await searchParams;
   const user = await getCurrentUser();
   if (!user) redirect("/sign-in");
 
   const ctx = { userId: user.id, organizationId: user.organizationId, role: user.role };
 
-  const [lowStockRes, purchaseOrdersRes, topProductsRes, topCustomersRes, revenueRes, unpaidRes, activityRes, productsRes] =
+  const [lowStockRes, purchaseOrdersRes, topProductsRes, topCustomersRes, revenueRes, unpaidRes, activityRes, productsRes, warehouseRes] =
     await Promise.all([
-      orchestrate({ action: "lowStock" }, ctx),
+      orchestrate({ action: "lowStock", warehouseId }, ctx),
       orchestrate({ action: "listPurchaseOrders" }, ctx),
       orchestrate({ action: "topProducts", limit: 3 }, ctx),
       orchestrate({ action: "topCustomers", limit: 3 }, ctx),
       orchestrate({ action: "revenueByDay", days: 30 }, ctx),
       orchestrate({ action: "listSalesOrders", unpaidOnly: true }, ctx),
-      orchestrate({ action: "listInventoryEvents", limit: 5 }, ctx),
+      orchestrate({ action: "listInventoryEvents", limit: 5, warehouseId }, ctx),
       orchestrate({ action: "listProducts" }, ctx),
+      orchestrate({ action: "listWarehouse" }, ctx),
     ]);
 
-  // orchestrate() returns Promise<any> (it dispatches to whichever handler
-  // matched the action name, so its return type can't be known statically) —
-  // bodyArray() gives the JSX below real shapes to work with instead of
-  // `any` (or undefined, on a non-200 response) leaking through into every
-  // .map()/.filter() callback below.
   const reorderItems = bodyArray<{ id: string; name: string; sku: string }>(lowStockRes, "products");
 
   const openPurchaseOrders = bodyArray<{
@@ -166,11 +167,8 @@ export default async function DashboardPage() {
   }>(activityRes, "events");
 
   const totalSkuCount = bodyArray<unknown>(productsRes, "products").length;
+  const warehouses = bodyArray<{ id: string, name: string }>(warehouseRes, "warehouses");
 
-  // "kind" (purchase vs. transfer) has no real backing data yet — nothing
-  // detects whether another warehouse has spare stock to transfer from
-  // instead of buying more. Every low-stock item counts as "to purchase"
-  // until that logic exists.
   const toPurchaseCount = reorderItems.length;
   const toTransferCount = 0;
 
@@ -191,7 +189,7 @@ export default async function DashboardPage() {
             {totalSkuCount.toLocaleString()} SKUs tracked across your organization.
           </p>
         </div>
-        <WarehouseFilter />
+        <WarehouseFilter warehouses={warehouses} selectedId={warehouseId} />
       </div>
 
       <div className="mb-6">

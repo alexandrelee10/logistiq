@@ -22,7 +22,7 @@ const ACTION_ROLES: Record<string, USERROLE[]> = {
   createProduct: [...ALWAYS_ALLOWED],
 
   // ----- Warehouse ----- \\
-  listWarehouse: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF", "PURCHASING", "VIEWER"],
+  listWarehouse: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF", "PURCHASING", "ACCOUNTING", "VIEWER"],
   createWarehouse: [...ALWAYS_ALLOWED],
   fulfillSalesOrder: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF"],
   receivePurchaseOrder: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF"],
