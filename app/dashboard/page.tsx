@@ -45,20 +45,10 @@ function formatRelativeTime(date: Date): string {
   return `${days}d ago`;
 }
 
-// Individual inventory events don't carry a "resulting stock status" label
-// the way the old mock data did (that would require cross-referencing the
-// product's current stock against its reorder point at render time) — this
-// is a simpler, honest stand-in derived from the event itself.
 function activityLabel(delta: number): string {
   return delta > 0 ? "Restocked" : "Adjusted";
 }
 
-// orchestrate() can come back with a non-200 status (403 from the
-// permission check in orchestrate.ts, or a 500 from a handler error) — in
-// that case `result.body` won't have the field the caller expects at all.
-// Rather than let a permission gap or a transient failure blow up the whole
-// page (an undefined array reaching .map()/.filter() below), fall back to
-// an empty array and let that one card render empty instead of crashing.
 function bodyArray<T>(result: { status: number; body: any }, key: string): T[] {
   if (result.status !== 200) return [];
   const value = result.body?.[key];
@@ -197,9 +187,9 @@ export default async function DashboardPage({
       </div>
 
       {/* Bento grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-stretch">
         {/* Products to reorder */}
-        <div className="xl:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+        <div className="xl:col-span-4 h-full flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
           <CardHeader
             icon={RefreshCw}
             count={String(reorderItems.length)}
@@ -213,47 +203,59 @@ export default async function DashboardPage({
               <Repeat size={13} className="text-slate-400" /> {toTransferCount} to transfer
             </span>
           </div>
-          <div className="flex flex-col divide-y divide-slate-50 max-h-[380px] overflow-y-auto -mx-1">
-            {reorderItems.map((it) => (
-              <div key={it.id} className="flex items-center gap-3 px-1 py-2.5">
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/8 text-accent">
-                  <ShoppingCart size={14} />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-foreground truncate">{it.name}</p>
-                  <p className="text-xs text-slate-400">{it.sku}</p>
-                </div>
+          <div className="flex flex-1 flex-col divide-y divide-slate-50 max-h-[380px] overflow-y-auto -mx-1">
+            {reorderItems.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
+                Nothing needs reordering here
               </div>
-            ))}
+            ) : (
+              reorderItems.map((it) => (
+                <div key={it.id} className="flex items-center gap-3 px-1 py-2.5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent/8 text-accent">
+                    <ShoppingCart size={14} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-foreground truncate">{it.name}</p>
+                    <p className="text-xs text-slate-400">{it.sku}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-          <button type="button" className="mt-4 flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover">
+          <button type="button" className="mt-auto pt-4 flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover">
             Reorder <ArrowRight size={14} />
           </button>
         </div>
 
         {/* Open purchase orders */}
-        <div className="xl:col-span-4 rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
+        <div className="xl:col-span-4 h-full flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
           <CardHeader icon={ClipboardList} count={String(openPurchaseOrders.length)} label="Open purchase orders" />
-          <div className="flex flex-col divide-y divide-slate-50">
-            {openPurchaseOrders.map((po) => (
-              <div key={po.id} className="flex items-center justify-between gap-3 py-2.5">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-foreground">{po.poNumber}</p>
-                  <p className="text-xs text-slate-400 truncate">{po.supplier.name}</p>
-                </div>
-                <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${PO_STATUS_STYLES[po.status]}`}>
-                  {PO_STATUS_LABELS[po.status] ?? po.status}
-                </span>
+          <div className="flex flex-1 flex-col divide-y divide-slate-50">
+            {openPurchaseOrders.length === 0 ? (
+              <div className="flex flex-1 items-center justify-center text-sm text-slate-400">
+                No open purchase orders
               </div>
-            ))}
+            ) : (
+              openPurchaseOrders.map((po) => (
+                <div key={po.id} className="flex items-center justify-between gap-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{po.poNumber}</p>
+                    <p className="text-xs text-slate-400 truncate">{po.supplier.name}</p>
+                  </div>
+                  <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ${PO_STATUS_STYLES[po.status]}`}>
+                    {PO_STATUS_LABELS[po.status] ?? po.status}
+                  </span>
+                </div>
+              ))
+            )}
           </div>
-          <button type="button" className="mt-4 flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover">
+          <button type="button" className="mt-auto pt-4 flex items-center gap-1.5 text-sm font-bold text-accent hover:text-accent-hover">
             All purchase orders <ArrowRight size={14} />
           </button>
         </div>
 
         {/* Top products + Top customers, stacked */}
-        <div className="xl:col-span-4 flex flex-col gap-6">
+        <div className="xl:col-span-4 h-full flex flex-col gap-6">
           <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-6">
             <CardHeader icon={Trophy} label="Top 3 products" />
             <div className="flex flex-col divide-y divide-slate-50">
