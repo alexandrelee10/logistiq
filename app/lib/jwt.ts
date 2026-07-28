@@ -4,18 +4,16 @@
  */
 
 import jwt from "jsonwebtoken"
+import { env } from "./env";
 
-const SESSION_SECRET: string = process.env.SESSION_SECRET ?? (() => {
-    throw new Error("SESSION_SECRET is not set — check your .env file");
-})();
 
 export function signInSessionToken(sessionId: string) {
-    return jwt.sign({ sid: sessionId }, SESSION_SECRET, { expiresIn: "30d"})
+    return jwt.sign({ sid: sessionId }, env.SESSION_SECRET, { expiresIn: "30d"})
 }
 
 export function verifySessionToken(token: string): { sid: string } | null {
     try {
-        const decoded = jwt.verify(token, SESSION_SECRET) as { sid: string };
+        const decoded = jwt.verify(token, env.SESSION_SECRET) as { sid: string };
         return decoded;
     } catch {
         return null;

@@ -1,6 +1,7 @@
 // Maps action name to the function that handles it. Added two small helpers to add to it and read it if need be
 
 import { USERROLE } from "@/generated/prisma/enums";
+import { env } from "./env";
 
 type Handler = (data: Record<string, any>, ctx: RequestContext) => Promise<any>
 
@@ -20,7 +21,7 @@ const REGISTRY = new Map<string, Handler>();
 // duplicate name (e.g. two files registering the same action by mistake)
 // still gets caught.
 export function register(name: string, handler: Handler) {
-    if (REGISTRY.has(name) && process.env.NODE_ENV === "production") {
+    if (REGISTRY.has(name) && env.NODE_ENV === "production") {
         throw new Error(`Duplicate handler registered for action "${name}"`);
     }
     REGISTRY.set(name, handler);

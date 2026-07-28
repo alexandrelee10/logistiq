@@ -6,6 +6,7 @@ import { signinSchema } from "@/validations/auth";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { env } from "@/app/lib/env";
 
 export async function POST(req: Request) {
     try {
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
             name: SESSION_COOKIE_NAME,
             value: token,
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: env.NODE_ENV === "production",
             sameSite: "lax",
             path: "/",
             maxAge: 60 * 60 * 24 * 30,
