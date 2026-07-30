@@ -1,9 +1,14 @@
 import { prisma } from "@/app/lib/prisma";
 import { signupSchema } from "@/validations/auth";
 import { slugify } from "@/app/lib/slug";
+import { SESSION_COOKIE_NAME } from "@/app/lib/auth";
+import { createSession } from "@/app/lib/session";
+import { signInSessionToken } from "@/app/lib/jwt";
+import { env } from "@/app/lib/env";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
+import { cookies } from "next/headers";
 
 export async function POST(req: Request) {
     try {
@@ -22,7 +27,6 @@ export async function POST(req: Request) {
             lastName,
             phoneNumber,
             email,
-            role,
             password,
             companyName,
         } = validation.data;
@@ -54,6 +58,8 @@ export async function POST(req: Request) {
                 },
             });
 
+            // Whoever creates the org is always its first admin — role is
+            // never taken from client input here (see validations/auth.ts).
             return tx.user.create({
                 data: {
                     id: randomUUID(),
@@ -62,10 +68,26 @@ export async function POST(req: Request) {
                     phoneNumber,
                     email,
                     password: hashedPassword,
-                    role,
+                    role: "ADMIN",
                     organizationId: org.id,
                 },
             });
+        });
+
+        // Auto-login: the password was already verified once above, so
+        // forcing a second sign-in on success is pure friction.
+        const session = await createSession(user.id);
+        const token = signInSessionToken(session.id);
+
+        const cookieStore = await cookies();
+        cookieStore.set({
+            name: SESSION_COOKIE_NAME,
+            value: token,
+            httpOnly: true,
+            secure: env.NODE_ENV === "production",
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 * 30,
         });
 
         return NextResponse.json(

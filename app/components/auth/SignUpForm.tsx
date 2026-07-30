@@ -3,10 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, ChevronDown, Building2 } from "lucide-react";
+import { Eye, EyeOff, Loader2, Mail, Lock, User, Phone, Building2, ArrowRight } from "lucide-react";
 import AuthLayout from "./AuthLayout";
-
-type Role = "ADMIN" | "MANAGER" | "WAREHOUSE_STAFF" | "PURCHASING" | "ACCOUNTING" | "VIEWER";
 
 type SignUpFormData = {
     firstName: string,
@@ -14,23 +12,25 @@ type SignUpFormData = {
     phoneNumber: string,
     email: string,
     password: string,
-    role: Role,
+    confirmPassword: string,
     companyName: string
 }
 
-const ROLE_OPTIONS: { value: Role; label: string }[] = [
-    { value: "ADMIN", label: "Admin" },
-    { value: "MANAGER", label: "Manager" },
-    { value: "WAREHOUSE_STAFF", label: "Warehouse Staff" },
-    { value: "PURCHASING", label: "Purchasing" },
-    { value: "ACCOUNTING", label: "Accounting" },
-    { value: "VIEWER", label: "Viewer" },
-];
-
 type FieldErrors = Partial<Record<keyof SignUpFormData, string>>;
+
+// Extracts an invite token whether the user pastes the full acceptUrl
+// (e.g. https://app.logistiq.com/accept-invite?token=abc123) or just the
+// raw token/code itself.
+function extractInviteToken(input: string): string {
+    const trimmed = input.trim();
+    const match = trimmed.match(/[?&]token=([^&\s]+)/);
+    if (match) return decodeURIComponent(match[1]);
+    return trimmed;
+}
 
 export default function SignUp() {
     const router = useRouter();
+    const [mode, setMode] = useState<"create" | "join">("create");
 
     const [form, setForm] = useState<SignUpFormData>({
         firstName: "",
@@ -38,7 +38,7 @@ export default function SignUp() {
         phoneNumber: "",
         email: "",
         password: "",
-        role: "ADMIN",
+        confirmPassword: "",
         companyName: "" // DEFAULT
     });
 
@@ -47,12 +47,28 @@ export default function SignUp() {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const [inviteInput, setInviteInput] = useState("");
+    const [inviteError, setInviteError] = useState("");
+
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
         setFieldErrors((prev) => ({ ...prev, [name]: undefined }));
+    };
+
+    const handleJoinSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setInviteError("");
+
+        const token = extractInviteToken(inviteInput);
+        if (!token) {
+            setInviteError("Paste the invite link or code your admin sent you");
+            return;
+        }
+
+        router.push(`/accept-invite?token=${encodeURIComponent(token)}`);
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -90,7 +106,9 @@ export default function SignUp() {
                 return;
             }
 
-            router.push("/sign-in?created=1");
+            // Sign-up now signs you in server-side — no need to re-enter
+            // credentials on a separate sign-in screen.
+            router.push("/dashboard");
         } catch {
             setServerMessage("Something went wrong. Please try again.");
         } finally {
@@ -100,8 +118,12 @@ export default function SignUp() {
 
     return (
         <AuthLayout
-            title="Create your account"
-            subtitle="Set up access for your team in minutes."
+            title={mode === "create" ? "Create your account" : "Join your team"}
+            subtitle={
+                mode === "create"
+                    ? "Set up access for your team in minutes."
+                    : "Enter the invite your admin sent you to join their organization."
+            }
             footer={
                 <p className="text-sm text-foreground/60">
                     Already have an account?{" "}
@@ -111,6 +133,51 @@ export default function SignUp() {
                 </p>
             }
         >
+            <div className="mb-6 grid grid-cols-2 gap-1 rounded-full bg-slate-100 p-1">
+                <button
+                    type="button"
+                    onClick={() => setMode("create")}
+                    className={`rounded-full py-2 text-sm font-bold transition-colors ${
+                        mode === "create" ? "bg-white text-foreground shadow-sm" : "text-foreground/50"
+                    }`}
+                >
+                    Create organization
+                </button>
+                <button
+                    type="button"
+                    onClick={() => setMode("join")}
+                    className={`rounded-full py-2 text-sm font-bold transition-colors ${
+                        mode === "join" ? "bg-white text-foreground shadow-sm" : "text-foreground/50"
+                    }`}
+                >
+                    Join organization
+                </button>
+            </div>
+
+            {mode === "join" ? (
+                <form onSubmit={handleJoinSubmit} className="flex flex-col gap-4" noValidate>
+                    <Field label="Invitation link or code" error={inviteError || undefined}>
+                        <input
+                            name="invite"
+                            value={inviteInput}
+                            placeholder="Paste your invite link or code"
+                            onChange={(e) => {
+                                setInviteInput(e.target.value);
+                                setInviteError("");
+                            }}
+                            required
+                            className="w-full border border-black/15 px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent"
+                        />
+                    </Field>
+
+                    <button
+                        type="submit"
+                        className="mt-2 flex items-center justify-center gap-2 text-sm font-bold text-white bg-accent hover:bg-accent-hover transition-colors px-5 py-2.5"
+                    >
+                        Continue <ArrowRight size={16} />
+                    </button>
+                </form>
+            ) : (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
                 <div className="grid grid-cols-2 gap-4">
                     <Field label="First name" error={fieldErrors.firstName}>
@@ -188,25 +255,6 @@ export default function SignUp() {
                     </div>
                 </Field>
 
-                <Field label="Role" error={fieldErrors.role}>
-                    <div className="relative">
-                        <select
-                            name="role"
-                            value={form.role}
-                            onChange={handleChange}
-                            required
-                            className="w-full appearance-none border border-black/15 px-3 py-2.5 text-sm text-foreground bg-white focus:outline-none focus:border-accent"
-                        >
-                            {ROLE_OPTIONS.map((role) => (
-                                <option key={role.value} value={role.value}>
-                                    {role.label}
-                                </option>
-                            ))}
-                        </select>
-                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/35 pointer-events-none" />
-                    </div>
-                </Field>
-
                 <Field label="Password" error={fieldErrors.password}>
                     <div className="relative">
                         <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/35" />
@@ -232,6 +280,26 @@ export default function SignUp() {
                     <p className="text-xs text-foreground/40">At least 8 characters</p>
                 </Field>
 
+                <Field label="Confirm password" error={fieldErrors.confirmPassword}>
+                    <div className="relative">
+                        <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/35" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            name="confirmPassword"
+                            value={form.confirmPassword}
+                            placeholder="• • • • • • • "
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                            required
+                            className="w-full border border-black/15 pl-9 pr-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-accent"
+                        />
+                    </div>
+                </Field>
+
+                <p className="text-xs text-foreground/40 -mt-2">
+                    You&apos;ll be the admin of {form.companyName || "your new organization"}.
+                </p>
+
                 {serverMessage && (
                     <p className="text-sm font-semibold text-accent">{serverMessage}</p>
                 )}
@@ -245,6 +313,7 @@ export default function SignUp() {
                     {submitting ? "Creating account..." : "Create account"}
                 </button>
             </form>
+            )}
         </AuthLayout>
     )
 }
