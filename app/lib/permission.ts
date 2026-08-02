@@ -19,7 +19,22 @@ const ACTION_ROLES: Record<string, USERROLE[]> = {
     "ACCOUNTING",
     "VIEWER",
   ],
+  getProduct: [
+    ...ALWAYS_ALLOWED,
+    "WAREHOUSE_STAFF",
+    "PURCHASING",
+    "ACCOUNTING",
+    "VIEWER",
+  ],
   createProduct: [...ALWAYS_ALLOWED],
+  listCategories: [
+    ...ALWAYS_ALLOWED,
+    "WAREHOUSE_STAFF",
+    "PURCHASING",
+    "ACCOUNTING",
+    "VIEWER",
+  ],
+  createCategory: [...ALWAYS_ALLOWED],
 
   // ----- Warehouse ----- \\
   listWarehouse: [...ALWAYS_ALLOWED, "WAREHOUSE_STAFF", "PURCHASING", "ACCOUNTING", "VIEWER"],

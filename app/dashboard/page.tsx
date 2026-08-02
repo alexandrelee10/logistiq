@@ -11,7 +11,7 @@ import {
   ArrowRight,
   type LucideIcon,
 } from "lucide-react";
-import WarehouseFilter from "@/app/components/dashboard/WarehouseFilter";
+import WarehouseFilter from "@/app/components/dashboard/Inventory/WarehouseFilter";
 import CopilotTipBanner from "@/app/components/dashboard/CopilotTipBanner";
 import { getCurrentUser } from "@/app/lib/auth";
 import { orchestrate } from "../lib/orchestrate";

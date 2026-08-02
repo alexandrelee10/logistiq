@@ -22,7 +22,12 @@ import {
   Eye,
   LogOut,
   X,
+  ArrowLeftRightIcon,
+  FilePen,
   NotebookPenIcon,
+  PackageSearchIcon,
+  RefreshCcwIcon,
+  ChartLineIcon,
   type LucideIcon,
 } from "lucide-react";
 import logistiqLogo from "@/public/assets/logo/logo.png";
@@ -53,11 +58,13 @@ const MAIN_NAV: NavItem[] = [
   {
     icon: Package,
     label: "Inventory",
-    href: "/dashboard/inventory",
+    href: "",
     actions: [
-      { icon: Eye, label: "View Inventory", href: "/dashboard/inventory" },
-      { icon: NotebookPenIcon, label: "Inventory Adjustments", href: "/dashboard/inventory/adjustments"},
-      { icon: Plus, label: "Add Product", href: "/dashboard/inventory/new" },
+      { icon: PackageSearchIcon, label: "Products", href: "/dashboard/inventory/products" },
+      { icon: RefreshCcwIcon, label: "Reorder", href: "/dashboard/inventory/reorder"},
+      { icon: ChartLineIcon, label: "Current Stock", href: "/dashboard/inventory/currentStock" },
+      { icon: FilePen, label: "Stock Adjustments", href: "/dashboard/inventory/stockAdjustments" },
+      { icon: ArrowLeftRightIcon, label: "Stock Transfers", href: "/dashboard/inventory/stockTransfers" },
       
     ],
   },
@@ -175,17 +182,32 @@ function NavRow({
           active ? "bg-white/10 text-white" : "text-white/55 hover:text-white hover:bg-white/5"
         }`}
       >
-        <Link
-          href={item.href}
-          onClick={onNavigate}
-          title={collapsed ? item.label : undefined}
-          className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold no-underline ${
-            collapsed ? "justify-center" : ""
-          }`}
-        >
-          <item.icon size={18} strokeWidth={2} className={active ? "text-accent" : ""} />
-          {!collapsed && <span className="truncate">{item.label}</span>}
-        </Link>
+        {hasActions ? (
+          <button
+            type="button"
+            onClick={() => (collapsed ? setFlyoutOpen((v) => !v) : setExpanded((v) => !v))}
+            title={collapsed ? item.label : undefined}
+            aria-expanded={collapsed ? flyoutOpen : expanded}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon size={18} strokeWidth={2} className={active ? "text-accent" : ""} />
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        ) : (
+          <Link
+            href={item.href}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold no-underline ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon size={18} strokeWidth={2} className={active ? "text-accent" : ""} />
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </Link>
+        )}
 
         {hasActions && !collapsed && (
           <button

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Sidebar, { type DashboardUser } from "./Sidebar";
 import Topbar from "./Topbar";
-import CopilotPanel from "./CopilotPanel";
+import CopilotPanel from "./copilot/CopilotPanel";
 
 export const OPEN_COPILOT_EVENT = "logistiq:open-copilot";
 

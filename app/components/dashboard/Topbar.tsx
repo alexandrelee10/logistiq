@@ -91,12 +91,9 @@ export default function Topbar({
       {/* Search */}
       <div className="flex-1 max-w-md">
         <div className="relative">
-          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search SKUs, orders, warehouses..."
-            className="w-full rounded-full bg-slate-100/80 pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:bg-white border border-transparent focus:border-accent/30 transition-colors"
-          />
+          <h2>
+            
+          </h2>
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Sparkles, ArrowRight } from "lucide-react";
-import { OPEN_COPILOT_EVENT } from "./DashboardShell";
+import { OPEN_COPILOT_EVENT } from "../DashboardShell";
 
 const PROMPTS = [
   "Which SKUs are at risk of stockout this week?",

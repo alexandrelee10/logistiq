@@ -1,5 +1,5 @@
-import WarehouseFilter from "@/app/components/dashboard/WarehouseFilter";
-import InventoryTable from "@/app/components/dashboard/InventoryTable";
+import WarehouseFilter from "@/app/components/dashboard/Inventory/WarehouseFilter";
+import InventoryTable from "@/app/components/dashboard/Inventory/InventoryTable";
 import { getCurrentUser } from "@/app/lib/auth";
 import { orchestrate } from "@/app/lib/orchestrate";
 import { redirect } from "next/navigation";
