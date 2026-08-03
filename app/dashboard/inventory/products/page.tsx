@@ -1,4 +1,4 @@
-import ProductsTable from "@/app/components/dashboard/ProductsTable";
+import ProductsTable from "@/app/components/dashboard/Inventory/products/ProductsTable";
 import { getCurrentUser } from "@/app/lib/auth";
 import { orchestrate } from "@/app/lib/orchestrate";
 import { redirect } from "next/navigation";

@@ -3,8 +3,8 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Package, RefreshCw, Plus } from "lucide-react";
-import ReorderModal from "./ReorderModal";
-import CreateProductModal from "./Inventory/products/CreateProductModal";
+import ReorderModal from "../reorder/ReorderModal";
+import CreateProductModal from "../products/CreateProductModal";
 
 type ProductRow = {
   id: string;
