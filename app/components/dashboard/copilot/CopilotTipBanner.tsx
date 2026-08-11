@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, X, ArrowRight } from "lucide-react";
-import { OPEN_COPILOT_EVENT } from "./DashboardShell";
+import { OPEN_COPILOT_EVENT } from "../DashboardShell";
 
 export default function CopilotTipBanner() {
   const [dismissed, setDismissed] = useState(false);

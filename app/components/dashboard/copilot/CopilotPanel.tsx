@@ -12,6 +12,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 type Message = {
   id: string;
@@ -32,20 +34,6 @@ const INITIAL_MESSAGE: Message = {
     "Hi, I'm your inventory Copilot. Ask me about stock levels, reorder points, warehouse transfers, or trends across your catalog.",
 };
 
-function getCannedReply(prompt: string): string {
-  const p = prompt.toLowerCase();
-  if (p.includes("stockout") || p.includes("low stock") || p.includes("risk")) {
-    return "Based on current velocity, 27 SKUs are projected to stock out within 14 days — most concentrated in Warehouse B. Want me to draft purchase orders for the top 5?";
-  }
-  if (p.includes("summar")) {
-    return "Today: 154 orders processed, 3 restocks confirmed (Warehouse A & B), and 12 new low-stock alerts triggered. Inventory value is up 1.1% week-over-week.";
-  }
-  if (p.includes("reorder") || p.includes("purchase order")) {
-    return "I can draft a purchase order once this is connected to your supplier data — for now this is a placeholder response so you can see how the flow feels.";
-  }
-  return "This is a placeholder response — connect this panel to your Copilot backend to get real, data-grounded answers here.";
-}
-
 export default function CopilotPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState("");
@@ -64,7 +52,7 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
-  const send = (text: string) => {
+  const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || thinking) return;
 
@@ -73,13 +61,22 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
     setInput("");
     setThinking(true);
 
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { id: crypto.randomUUID(), role: "assistant", content: getCannedReply(trimmed) },
-      ]);
-      setThinking(false);
-    }, 700);
+    const res = await fetch("/api/copilot", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [...messages, userMsg]
+          .filter((m) => m.id !== "intro")
+          .map((m) => ({ role: m.role, content: m.content })),
+      }),
+    });
+    const data = await res.json();
+
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: "assistant", content: data.message },
+    ]);
+    setThinking(false);
   };
 
   if (!open) return null;
@@ -115,13 +112,17 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
           {messages.map((m) => (
             <div
               key={m.id}
-              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+              className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed
+                [&_strong]:font-bold [&_em]:italic [&_p]:my-1 first:[&_p]:mt-0 last:[&_p]:mb-0
+                [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-0.5
+                [&_code]:bg-black/5 [&_code]:rounded [&_code]:px-1 [&_code]:text-[13px]
+                [&_a]:underline ${
                 m.role === "assistant"
-                  ? "bg-slate-100 text-foreground self-start rounded-tl-sm"
-                  : "bg-accent text-white self-end rounded-tr-sm"
+                  ? "bg-slate-100 text-foreground self-start rounded-tl-sm [&_a]:text-accent"
+                  : "bg-accent text-white self-end rounded-tr-sm [&_a]:text-white"
               }`}
             >
-              {m.content}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{m.content}</ReactMarkdown>
             </div>
           ))}
           {thinking && (

@@ -19,6 +19,10 @@ const envSchema = z.object({
     .min(32, "SESSION_SECRET must be at least 32 characters (it signs session JWTs — a short secret is brute-forceable)"),
 
     NODE_ENV: z.enum(["development", "production", "test" ]).default("development"),
+
+    ANTHROPIC_API_KEY: z.string({
+        message: "ANTHROPIC_API_KEY is not set - check your .env file"
+    })
 });
 
 const parsed = envSchema.safeParse(process.env);

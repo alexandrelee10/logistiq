@@ -12,7 +12,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import WarehouseFilter from "@/app/components/dashboard/Inventory/WarehouseFilter";
-import CopilotTipBanner from "@/app/components/dashboard/CopilotTipBanner";
+import CopilotTipBanner from "@/app/components/dashboard/copilot/CopilotTipBanner";
 import { getCurrentUser } from "@/app/lib/auth";
 import { orchestrate } from "../lib/orchestrate";
 import { redirect } from "next/navigation";
