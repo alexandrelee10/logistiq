@@ -63,7 +63,7 @@ const MAIN_NAV: NavItem[] = [
       { icon: PackageSearchIcon, label: "Products", href: "/dashboard/inventory/products" },
       { icon: RefreshCcwIcon, label: "Reorder", href: "/dashboard/inventory/reorder"},
       { icon: ChartLineIcon, label: "Current Stock", href: "/dashboard/inventory/currentStock" },
-      { icon: FilePen, label: "Stock Adjustments", href: "/dashboard/inventory/stockAdjustments" },
+      { icon: FilePen, label: "Stock Adjustments", href: "/dashboard/inventory/adjustments" },
       { icon: ArrowLeftRightIcon, label: "Stock Transfers", href: "/dashboard/inventory/stockTransfers" },
       
     ],

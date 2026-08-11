@@ -35,6 +35,8 @@ function formatPrice(value: number | null) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
+
+
 export default function ProductsTable({
   products,
   suppliers,

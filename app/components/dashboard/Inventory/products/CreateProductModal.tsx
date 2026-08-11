@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, X } from "lucide-react";
 
 type Category = { id: string; name: string };
-// 
+//
 export default function CreateProductModal({
   categories,
   onClose,
@@ -13,7 +13,7 @@ export default function CreateProductModal({
   categories: Category[]; // Product category
   onClose: () => void; // Function to close mini screen
 }) {
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [sku, setSku] = useState("");
   const [name, setName] = useState("");
@@ -37,18 +37,21 @@ export default function CreateProductModal({
     // Set button to "creating..."
     setSubmitting(true);
     try {
-      // Category Id 
+      // Category Id
       let resolvedCategoryId = categoryId || undefined;
 
-      // If user enters something new, use createCategory function to add it to the db 
+      // If user enters something new, use createCategory function to add it to the db
       if (newCategory.trim()) {
         // Category Response
         const catRes = await fetch("/api/requests", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ action: "createCategory", name: newCategory.trim() }),
+          body: JSON.stringify({
+            action: "createCategory",
+            name: newCategory.trim(),
+          }),
         });
-        // Get the info out of response 
+        // Get the info out of response
         const catData = await catRes.json();
         if (!catRes.ok) {
           setError(catData.error ?? "Unable to create category.");
@@ -69,7 +72,7 @@ export default function CreateProductModal({
           categoryId: resolvedCategoryId,
         }),
       });
-      
+
       const data = await res.json();
 
       if (!res.ok) {
@@ -104,7 +107,9 @@ export default function CreateProductModal({
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-foreground">SKU</label>
+              <label className="text-xs font-semibold text-foreground">
+                SKU
+              </label>
               <input
                 value={sku}
                 onChange={(e) => setSku(e.target.value)}
@@ -113,7 +118,9 @@ export default function CreateProductModal({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-foreground">Quantity</label>
+              <label className="text-xs font-semibold text-foreground">
+                Low stock limit
+              </label>
               <input
                 type="number"
                 min={0}
@@ -125,7 +132,9 @@ export default function CreateProductModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Name</label>
+            <label className="text-xs font-semibold text-foreground">
+              Name
+            </label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -135,7 +144,9 @@ export default function CreateProductModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Price (optional)</label>
+            <label className="text-xs font-semibold text-foreground">
+              Price (optional)
+            </label>
             <input
               type="number"
               min={0}
@@ -148,7 +159,9 @@ export default function CreateProductModal({
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-foreground">Category (optional)</label>
+            <label className="text-xs font-semibold text-foreground">
+              Category (optional)
+            </label>
             <select
               value={categoryId}
               onChange={(e) => {
@@ -175,7 +188,9 @@ export default function CreateProductModal({
             />
           </div>
 
-          {error && <p className="text-xs font-semibold text-accent">{error}</p>}
+          {error && (
+            <p className="text-xs font-semibold text-accent">{error}</p>
+          )}
 
           <button
             type="submit"
