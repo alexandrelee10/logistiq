@@ -24,7 +24,20 @@ register("getProduct", async (data, ctx) => {
 
     const product = await prisma.product.findFirst({
         where: { id: productId, organizationId: ctx.organizationId },
-        include: { category: { select: { id: true, name: true } } },
+        include: {
+            category: { select: { id: true, name: true } },
+            // Pulled in so the detail page's "Order history" tab can show
+            // every PO/SO line this product has ever appeared on, without
+            // a second round-trip request.
+            purchaseOrderLines: {
+                include: { purchaseOrder: { include: { supplier: { select: { name: true } } } } },
+                orderBy: { id: "desc" },
+            },
+            salesOrderLines: {
+                include: { salesOrder: { include: { customer: { select: { name: true } } } } },
+                orderBy: { id: "desc" },
+            },
+        },
     });
 
     if (!product) {
@@ -35,6 +48,14 @@ register("getProduct", async (data, ctx) => {
 });
 
 // Create product
+//
+// `attributes` is a free-form Json column. The detail page treats a handful
+// of keys as "reserved" (description, imageUrl, barcode, dimensions,
+// weight, baseUnit, packageUnit, unitsPerPackage, cost, notes) and renders
+// them into dedicated UI slots (image box, pricing panel, remarks, etc.);
+// anything else the caller sends just falls into the generic "Product
+// details" custom-fields grid. This avoids a schema migration for fields
+// that are really just structured display data.
 register("createProduct", async (data, ctx) => {
     const product = await prisma.product.create({
         data: {
