@@ -132,6 +132,9 @@ model Product {
   reorderPoint Int @default(0) // Fix later
   attributes Json
 
+  supplierId String?
+  supplier Supplier? @relation(fields: [supplierId], references: [id])
+
   categoryId String?
   category Category? @relation(fields: [categoryId], references: [id])
 
@@ -210,6 +213,8 @@ model Supplier {
 
 
   purchaseOrders PurchaseOrder[]
+
+  products Product[]
 }
 
 model PurchaseOrder {

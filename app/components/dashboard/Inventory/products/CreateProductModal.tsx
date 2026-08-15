@@ -6,12 +6,15 @@ import { Loader2, X, ChevronDown, Plus, Trash2 } from "lucide-react";
 
 type Category = { id: string; name: string };
 type AttributeRow = { key: string; value: string };
+type Supplier = { id: string; name: string; }
 
 export default function CreateProductModal({
   categories,
+  suppliers,
   onClose,
 }: {
   categories: Category[]; // Product category
+  suppliers: Supplier[] // Suppliers 
   onClose: () => void; // Function to close mini screen
 }) {
   const router = useRouter();
@@ -21,13 +24,12 @@ export default function CreateProductModal({
 
   const [reorderPoint, setReorderPoint] = useState("0");
   const [price, setPrice] = useState("");
+  
+  // Category 
   const [categoryId, setCategoryId] = useState("");
   const [newCategory, setNewCategory] = useState("");
 
   // Everything below lives in Product.attributes (a Json column) rather than
-  // dedicated schema columns — see the comment on createProduct in
-  // product.ts for why. Kept behind a collapsed section so the common case
-  // (just SKU/name/price) stays a two-second form.
   const [showMore, setShowMore] = useState(false);
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -46,17 +48,18 @@ export default function CreateProductModal({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Supplier
+  const [supplierId, setSupplierId] = useState("");
+  const [newSupplierName, setNewSupplierName] = useState("");
+
+  // Attributes
   const addAttributeRow = () => setCustomAttributes((prev) => [...prev, { key: "", value: "" }]);
   const updateAttributeRow = (index: number, field: "key" | "value", value: string) =>
     setCustomAttributes((prev) => prev.map((row, i) => (i === index ? { ...row, [field]: value } : row)));
   const removeAttributeRow = (index: number) =>
     setCustomAttributes((prev) => prev.filter((_, i) => i !== index));
-
-  // Collapses all the "more details" inputs down into the single JSON blob
-  // createProduct expects. Reserved keys here are the ones the product
-  // detail page knows to pull out into dedicated slots (image, dimensions,
-  // pricing, remarks); anything typed into the custom rows below just
-  // passes through as-is into the generic attributes grid.
+  
+  // Build Attributes 
   function buildAttributes(): Record<string, string> {
     const attrs: Record<string, string> = {};
     if (description.trim()) attrs.description = description.trim();
@@ -114,6 +117,27 @@ export default function CreateProductModal({
         }
         resolvedCategoryId = catData.category.id;
       }
+
+      // Supplier Id
+      let resolvedSupplierId = supplierId || undefined;
+
+      // If user enters something new, use createSupplier function to add it to the db
+      if (newSupplierName.trim()) {
+        const supRes = await fetch("/api/requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "createSupplier",
+            name: newSupplierName.trim(),
+          }),
+        });
+        const supData = await supRes.json();
+        if (!supRes.ok) {
+          setError(supData.error ?? "Unable to create supplier.");
+          return;
+        }
+        resolvedSupplierId = supData.supplier.id;
+      }
       // Create product
       const res = await fetch("/api/requests", {
         method: "POST",
@@ -125,6 +149,7 @@ export default function CreateProductModal({
           reorderPoint: reorderPoint === "" ? 0 : Number(reorderPoint),
           price: price === "" ? undefined : Number(price),
           categoryId: resolvedCategoryId,
+          supplierId: resolvedSupplierId,
           attributes: buildAttributes(),
         }),
       });
@@ -166,10 +191,14 @@ export default function CreateProductModal({
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
+            
+            {/* SKU Label */}
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>SKU</label>
               <input value={sku} onChange={(e) => setSku(e.target.value)} placeholder="ABC-123" className={inputClass} />
             </div>
+            
+            {/* Low stock limit label */}
             <div className="flex flex-col gap-1.5">
               <label className={labelClass}>Low stock limit</label>
               <input
@@ -181,12 +210,14 @@ export default function CreateProductModal({
               />
             </div>
           </div>
-
+          
+          {/* Name Label */}
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Name</label>
             <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Product name" className={inputClass} />
           </div>
-
+          
+          {/* Price Label */}
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Price (optional)</label>
             <input
@@ -199,17 +230,20 @@ export default function CreateProductModal({
               className={inputClass}
             />
           </div>
-
+          {/* Category Label */}
           <div className="flex flex-col gap-1.5">
             <label className={labelClass}>Category (optional)</label>
-            <select
-              value={categoryId}
+            
+            {/* Category Select */}
+            <select value={categoryId}
               onChange={(e) => {
                 setCategoryId(e.target.value);
                 if (e.target.value) setNewCategory("");
               }}
               className={`${inputClass} bg-white`}
             >
+              
+              {/* Cateogory options */}
               <option value="">No category</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -217,6 +251,8 @@ export default function CreateProductModal({
                 </option>
               ))}
             </select>
+            
+            {/* Create a new category */}
             <input
               value={newCategory}
               onChange={(e) => {
@@ -227,7 +263,8 @@ export default function CreateProductModal({
               className={inputClass}
             />
           </div>
-
+          
+          {/* More details dropdown */}
           <button
             type="button"
             onClick={() => setShowMore((v) => !v)}
@@ -236,6 +273,38 @@ export default function CreateProductModal({
             <ChevronDown size={14} className={`transition-transform ${showMore ? "rotate-180" : ""}`} />
             {showMore ? "Hide" : "Show"} more details
           </button>
+          
+          {/* Supplier  */}
+          <div className="flex flex-col gap-1.5">
+            <label className={labelClass}>Preferred supplier (optional)</label>
+            <select
+              value={supplierId}
+              onChange={(e) => {
+                setSupplierId(e.target.value);
+                if (e.target.value) setNewSupplierName("");
+              }}
+              className={`${inputClass} bg-white`}
+            >
+              <option value="">No supplier</option>
+              {/* Map through current suppliers */}
+              {suppliers.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+            
+            {/* Add another supplier: Change this to be more modern */}
+            <input
+              value={newSupplierName}
+              onChange={(e) => {
+                setNewSupplierName(e.target.value);
+                if (e.target.value) setSupplierId("");
+              }}
+              placeholder="...or create a new supplier"
+              className={inputClass}
+            />
+          </div>
 
           {showMore && (
             <div className="flex flex-col gap-4 rounded-xl border border-slate-100 bg-slate-50/60 p-4">
@@ -338,7 +407,7 @@ export default function CreateProductModal({
           )}
 
           {error && <p className="text-xs font-semibold text-accent">{error}</p>}
-
+          {/* Create product button */}
           <button
             type="submit"
             disabled={submitting}

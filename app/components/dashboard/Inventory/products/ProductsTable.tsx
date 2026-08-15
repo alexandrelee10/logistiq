@@ -225,7 +225,11 @@ export default function ProductsTable({
         <ReorderModal product={reorderTarget} suppliers={suppliers} onClose={() => setReorderTarget(null)} />
       )}
       {showCreateProduct && (
-        <CreateProductModal categories={categories} onClose={() => setShowCreateProduct(false)} />
+        <CreateProductModal
+          categories={categories}
+          suppliers={suppliers}
+          onClose={() => setShowCreateProduct(false)}
+        />
       )}
     </div>
   );
