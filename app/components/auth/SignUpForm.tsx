@@ -18,9 +18,6 @@ type SignUpFormData = {
 
 type FieldErrors = Partial<Record<keyof SignUpFormData, string>>;
 
-// Extracts an invite token whether the user pastes the full acceptUrl
-// (e.g. https://app.logistiq.com/accept-invite?token=abc123) or just the
-// raw token/code itself.
 function extractInviteToken(input: string): string {
     const trimmed = input.trim();
     const match = trimmed.match(/[?&]token=([^&\s]+)/);
@@ -30,6 +27,8 @@ function extractInviteToken(input: string): string {
 
 export default function SignUp() {
     const router = useRouter();
+    
+    // Mode may only create or join 
     const [mode, setMode] = useState<"create" | "join">("create");
 
     const [form, setForm] = useState<SignUpFormData>({
@@ -47,9 +46,11 @@ export default function SignUp() {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    // Invite info for form 
     const [inviteInput, setInviteInput] = useState("");
     const [inviteError, setInviteError] = useState("");
 
+    // Handle select and input elements 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {

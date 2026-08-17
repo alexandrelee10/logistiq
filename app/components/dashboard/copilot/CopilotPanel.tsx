@@ -1,20 +1,13 @@
+// Copilot panel 
 "use client";
 
-/**
- * Front-end scaffold for the inventory Copilot.
- *
- * This is intentionally mocked — messages are answered with canned copy
- * client-side. To wire up a real assistant, replace `getCannedReply()` with
- * a call to an API route (e.g. POST /api/copilot) that streams a response
- * from your model of choice, and swap the setTimeout below for the
- * streamed/awaited result.
- */
 
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+// Ensure chat has all the following
 type Message = {
   id: string;
   role: "assistant" | "user";
@@ -35,8 +28,12 @@ const INITIAL_MESSAGE: Message = {
 };
 
 export default function CopilotPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  
+  // Ensure convo starts with initial messsage and ensure messages is an array containing Message objects 
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  
   const [input, setInput] = useState("");
+  
   const [thinking, setThinking] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 

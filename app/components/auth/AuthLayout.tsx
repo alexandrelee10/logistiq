@@ -1,3 +1,4 @@
+// Custom reusuable wrapper for authentication pages
 import Image from "next/image";
 import Link from "next/link";
 import { Lock } from "lucide-react";

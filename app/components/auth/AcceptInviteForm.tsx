@@ -12,6 +12,7 @@ type InvitePreview = {
     role: string;
 };
 
+// Info users need to provide 
 type AcceptInviteFormData = {
     firstName: string;
     lastName: string;
@@ -20,8 +21,11 @@ type AcceptInviteFormData = {
     confirmPassword: string;
 };
 
+// Makes properties optional using Paritial
+// keyof makes all of items have "|"
 type FieldErrors = Partial<Record<keyof AcceptInviteFormData, string>>;
 
+// Neatly format role
 function roleLabel(role: string) {
     return role
         .toLowerCase()
@@ -32,14 +36,17 @@ function roleLabel(role: string) {
 
 export default function AcceptInviteForm() {
     const router = useRouter();
+    
+    // Find valid token and save it
     const searchParams = useSearchParams();
     const token = searchParams.get("token") ?? "";
 
-    // Only kick off the fetch (and the loading state) when there's actually
-    // a token to look up — avoids setting state synchronously in the effect
-    // body for the no-token case.
+    // Boolean to ensure token is active before loading
     const [loadingInvite, setLoadingInvite] = useState(Boolean(token));
+
+    
     const [invite, setInvite] = useState<InvitePreview | null>(null);
+    // Error if token is invalid / nonexistent
     const [loadError, setLoadError] = useState(
         token ? "" : "This invite link is missing its token."
     );
@@ -57,17 +64,19 @@ export default function AcceptInviteForm() {
     const [submitting, setSubmitting] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    // Verify the invitation 
     useEffect(() => {
         if (!token) return;
 
-        let cancelled = false;
+        let ignoreResults = false; // Catch irrelevant requests if user is not on page anymore
 
         (async () => {
+            // Send GET and verify conditions are valid
             try {
                 const res = await fetch(`/api/auth/accept-invite?token=${encodeURIComponent(token)}`);
                 const data = await res.json();
 
-                if (cancelled) return;
+                if (ignoreResults) return;
 
                 if (!res.ok) {
                     setLoadError(data.message ?? "This invite is invalid or has already been used.");
@@ -75,14 +84,14 @@ export default function AcceptInviteForm() {
                     setInvite(data);
                 }
             } catch {
-                if (!cancelled) setLoadError("Something went wrong loading this invite.");
+                if (!ignoreResults) setLoadError("Something went wrong loading this invite.");
             } finally {
-                if (!cancelled) setLoadingInvite(false);
+                if (!ignoreResults) setLoadingInvite(false);
             }
         })();
 
         return () => {
-            cancelled = true;
+            ignoreResults = true;
         };
     }, [token]);
 
@@ -110,10 +119,12 @@ export default function AcceptInviteForm() {
             if (!res.ok) {
                 setServerMessage(data.message ?? "Unable to join organization");
 
+                // Get the field name and any amount of strings attached for front end errors if no errors leave it alone 
                 const fieldErrorEntries = data?.error?.fieldErrors as
                     | Record<string, string[]>
                     | undefined;
 
+                    // Loop through strings and display the first error for all fields 
                 if (fieldErrorEntries) {
                     const next: FieldErrors = {};
                     for (const [key, messages] of Object.entries(fieldErrorEntries)) {
@@ -134,6 +145,9 @@ export default function AcceptInviteForm() {
         }
     };
 
+    // Screens 
+
+    // State 1 - Check the invite
     if (loadingInvite) {
         return (
             <AuthLayout title="Join organization" subtitle="Checking your invite…" footer={null}>
@@ -144,6 +158,7 @@ export default function AcceptInviteForm() {
         );
     }
 
+    // State 2 - Invite failed 
     if (loadError || !invite) {
         return (
             <AuthLayout
@@ -166,6 +181,7 @@ export default function AcceptInviteForm() {
         );
     }
 
+    // Invite works and permits user to sign up through invite 
     return (
         <AuthLayout
             title="Join organization"
@@ -296,6 +312,7 @@ export default function AcceptInviteForm() {
     );
 }
 
+// Custom field className
 function Field({
     label,
     error,
