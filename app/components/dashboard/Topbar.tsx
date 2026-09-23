@@ -39,7 +39,10 @@ const NOTIFICATIONS = [
 ];
 
 function initials(user: DashboardUser) {
-  return `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "U";
+  return (
+    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() ||
+    "U"
+  );
 }
 
 export default function Topbar({
@@ -59,9 +62,12 @@ export default function Topbar({
   const userRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Close notifications if user clicks somewhere else 
     function onClickOutside(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setNotifOpen(false);
-      if (userRef.current && !userRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+      if (notifRef.current && !notifRef.current.contains(e.target as Node))
+        setNotifOpen(false);
+      if (userRef.current && !userRef.current.contains(e.target as Node))
+        setUserMenuOpen(false);
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
@@ -89,11 +95,20 @@ export default function Topbar({
       </button>
 
       {/* Search */}
-      <div className="flex-1 max-w-md">
-        <div className="relative">
-          <h2>
-            
-          </h2>
+      <div className="flex flex-1 justify-center">
+        <div className="relative w-full max-w-md">
+          <Search
+            size={18}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+
+          <input
+            type="search"
+            name="search"
+            placeholder="Search products, SKUs, or warehouses..."
+            aria-label="Search inventory"
+            className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-foreground outline-none transition-colors placeholder:text-slate-400 focus:border-accent focus:bg-white focus:ring-2 focus:ring-accent/20"
+          />
         </div>
       </div>
 
@@ -124,16 +139,25 @@ export default function Topbar({
         {notifOpen && (
           <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-slate-200/70 bg-white shadow-xl shadow-slate-900/[0.08] overflow-hidden">
             <div className="px-4 py-3 border-b border-slate-100">
-              <span className="text-sm font-bold text-foreground">Notifications</span>
+              <span className="text-sm font-bold text-foreground">
+                Notifications
+              </span>
             </div>
             <div className="flex flex-col">
               {NOTIFICATIONS.map((n) => (
-                <div key={n.title} className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
-                  <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${n.tone}`}>
+                <div
+                  key={n.title}
+                  className="flex items-start gap-3 px-4 py-3 hover:bg-slate-50 transition-colors"
+                >
+                  <span
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${n.tone}`}
+                  >
                     <n.icon size={15} />
                   </span>
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground leading-snug">{n.title}</p>
+                    <p className="text-sm font-semibold text-foreground leading-snug">
+                      {n.title}
+                    </p>
                     <p className="text-xs text-slate-400 mt-0.5">{n.time}</p>
                   </div>
                 </div>

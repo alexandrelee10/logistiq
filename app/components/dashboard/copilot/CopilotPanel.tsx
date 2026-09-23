@@ -1,7 +1,6 @@
 // Copilot panel 
 "use client";
 
-
 import { useEffect, useRef, useState } from "react";
 import { Sparkles, X, Send, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -34,14 +33,18 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
   
   const [input, setInput] = useState("");
   
-  const [thinking, setThinking] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [thinking, setThinking] = useState(false);
+  
+  const scrollRef = useRef<HTMLDivElement>(null); // Scroll to newest message automatically
+
+  // Automatically scrolling for messages 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, thinking]);
+  }, [messages, thinking]); // Run whenever these states change 
 
-  useEffect(() => {
+  // Esc exit
+  useEffect(() => { 
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
     }
@@ -49,26 +52,29 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, onClose]);
 
+  // Send question to API 
   const send = async (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || thinking) return;
 
-    const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
-    setInput("");
-    setThinking(true);
+    const userMsg: Message = { id: crypto.randomUUID(), role: "user", content: trimmed }; // Create a unique ID 
+    setMessages((prev) => [...prev, userMsg]); 
+    setInput(""); // Empty submission
+    setThinking(true); // Display "thinking.."
+
 
     const res = await fetch("/api/copilot", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        messages: [...messages, userMsg]
-          .filter((m) => m.id !== "intro")
+        messages: [...messages, userMsg] // combines prev convo with latest messages
+          .filter((m) => m.id !== "intro") // Remove intro message 
           .map((m) => ({ role: m.role, content: m.content })),
       }),
     });
     const data = await res.json();
 
+    // Add copilot answer to convo
     setMessages((prev) => [
       ...prev,
       { id: crypto.randomUUID(), role: "assistant", content: data.message },
@@ -83,17 +89,21 @@ export default function CopilotPanel({ open, onClose }: { open: boolean; onClose
       <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px]" onClick={onClose} aria-hidden />
 
       <aside className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl flex flex-col border-l border-slate-200">
+        
         {/* Header */}
         <div className="flex items-center justify-between px-5 h-[72px] border-b border-slate-100 shrink-0">
           <div className="flex items-center gap-2.5">
+            {/* Icon */}
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-accent to-[#7a0c24] text-white">
               <Sparkles size={16} />
             </span>
+            {/* Title + Subtitle */}
             <div>
               <p className="text-sm font-bold text-foreground leading-tight">Logistiq Copilot</p>
               <p className="text-xs text-slate-400 leading-tight">Beta &middot; inventory assistant</p>
             </div>
           </div>
+          {/* Exit */}
           <button
             type="button"
             onClick={onClose}

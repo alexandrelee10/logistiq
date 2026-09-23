@@ -29,6 +29,8 @@ import {
   RefreshCcwIcon,
   ChartLineIcon,
   type LucideIcon,
+  Bell,
+  icons,
 } from "lucide-react";
 import logistiqLogo from "@/public/assets/logo/logo.png";
 
@@ -48,9 +50,11 @@ type NavAction = {
 type NavItem = {
   icon: LucideIcon;
   label: string;
-  href: string;
+  href?: string;
   actions?: NavAction[];
+  onClick?: () => void;
 };
+
 // Side bar elements
 const MAIN_NAV: NavItem[] = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
@@ -60,12 +64,31 @@ const MAIN_NAV: NavItem[] = [
     label: "Inventory",
     href: "",
     actions: [
-      { icon: PackageSearchIcon, label: "Products", href: "/dashboard/inventory/products" },
-      { icon: RefreshCcwIcon, label: "Reorder", href: "/dashboard/inventory/reorder"},
-      { icon: ChartLineIcon, label: "Current Stock", href: "/dashboard/inventory/currentStock" },
-      { icon: FilePen, label: "Stock Adjustments", href: "/dashboard/inventory/adjustments" },
-      { icon: ArrowLeftRightIcon, label: "Stock Transfers", href: "/dashboard/inventory/stockTransfers" },
-      
+      {
+        icon: PackageSearchIcon,
+        label: "Products",
+        href: "/dashboard/inventory/products",
+      },
+      {
+        icon: RefreshCcwIcon,
+        label: "Reorder",
+        href: "/dashboard/inventory/reorder",
+      },
+      {
+        icon: ChartLineIcon,
+        label: "Current Stock",
+        href: "/dashboard/inventory/currentStock",
+      },
+      {
+        icon: FilePen,
+        label: "Stock Adjustments",
+        href: "/dashboard/inventory/adjustments",
+      },
+      {
+        icon: ArrowLeftRightIcon,
+        label: "Stock Transfers",
+        href: "/dashboard/inventory/stockTransfers",
+      },
     ],
   },
   // Orders Section
@@ -88,14 +111,22 @@ const MAIN_NAV: NavItem[] = [
       { icon: Plus, label: "Add Warehouse", href: "/dashboard/warehouses/new" },
     ],
   },
-  // Purchase or Sales Order Section 
+  // Purchase or Sales Order Section
   {
     icon: ClipboardList,
     label: "Purchase Orders",
     href: "/dashboard/purchase-orders",
     actions: [
-      { icon: Eye, label: "View Purchase Orders", href: "/dashboard/purchase-orders" },
-      { icon: Plus, label: "Create Purchase Order", href: "/dashboard/purchase-orders/new" },
+      {
+        icon: Eye,
+        label: "View Purchase Orders",
+        href: "/dashboard/purchase-orders",
+      },
+      {
+        icon: Plus,
+        label: "Create Purchase Order",
+        href: "/dashboard/purchase-orders/new",
+      },
     ],
   },
   // Reports Section
@@ -105,26 +136,42 @@ const MAIN_NAV: NavItem[] = [
     href: "/dashboard/reports",
     actions: [
       { icon: Eye, label: "View Reports", href: "/dashboard/reports" },
-      { icon: Plus, label: "Build Custom Report", href: "/dashboard/reports/new" },
+      {
+        icon: Plus,
+        label: "Build Custom Report",
+        href: "/dashboard/reports/new",
+      },
     ],
   },
 ];
 
+// Second side bar
 const SECONDARY_NAV: NavItem[] = [
   {
     icon: Plug,
     label: "Integrations",
     href: "/dashboard/integrations",
     actions: [
-      { icon: Eye, label: "Browse Integrations", href: "/dashboard/integrations" },
+      {
+        icon: Eye,
+        label: "Browse Integrations",
+        href: "/dashboard/integrations",
+      },
       { icon: Plus, label: "Connect New", href: "/dashboard/integrations/new" },
     ],
   },
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
+// Notifications
+const NOTIFICATIONS_NAV: NavItem[] = [{ icon: Bell, label: "Notifications" }];
+
+// Formatting functions
 function initials(user: DashboardUser) {
-  return `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() || "U";
+  return (
+    `${user.firstName?.[0] ?? ""}${user.lastName?.[0] ?? ""}`.toUpperCase() ||
+    "U"
+  );
 }
 
 function formatRole(role: string) {
@@ -135,143 +182,7 @@ function formatRole(role: string) {
     .join(" ");
 }
 
-function NavRow({
-  item,
-  active,
-  collapsed,
-  onNavigate,
-}: {
-  item: NavItem;
-  active: boolean;
-  collapsed: boolean;
-  onNavigate?: () => void;
-}) {
-  const hasActions = !!item.actions?.length;
-  const [expanded, setExpanded] = useState(false);
-  const [flyoutOpen, setFlyoutOpen] = useState(false);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const openFlyout = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
-    setFlyoutOpen(true);
-  };
-  const closeFlyoutSoon = () => {
-    closeTimer.current = setTimeout(() => setFlyoutOpen(false), 150);
-  };
-
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setFlyoutOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", onClickOutside);
-    return () => document.removeEventListener("mousedown", onClickOutside);
-  }, []);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative"
-      onMouseEnter={collapsed && hasActions ? openFlyout : undefined}
-      onMouseLeave={collapsed && hasActions ? closeFlyoutSoon : undefined}
-    >
-      <div
-        className={`group relative flex items-center rounded-xl transition-colors ${
-          active ? "bg-white/10 text-white" : "text-white/55 hover:text-white hover:bg-white/5"
-        }`}
-      >
-        {hasActions ? (
-          <button
-            type="button"
-            onClick={() => (collapsed ? setFlyoutOpen((v) => !v) : setExpanded((v) => !v))}
-            title={collapsed ? item.label : undefined}
-            aria-expanded={collapsed ? flyoutOpen : expanded}
-            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <item.icon size={18} strokeWidth={2} className={active ? "text-accent" : ""} />
-            {!collapsed && <span className="truncate">{item.label}</span>}
-          </button>
-        ) : (
-          <Link
-            href={item.href}
-            onClick={onNavigate}
-            title={collapsed ? item.label : undefined}
-            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold no-underline ${
-              collapsed ? "justify-center" : ""
-            }`}
-          >
-            <item.icon size={18} strokeWidth={2} className={active ? "text-accent" : ""} />
-            {!collapsed && <span className="truncate">{item.label}</span>}
-          </Link>
-        )}
-
-        {hasActions && !collapsed && (
-          <button
-            type="button"
-            onClick={() => setExpanded((v) => !v)}
-            aria-expanded={expanded}
-            aria-label={`${item.label} quick actions`}
-            className="pr-3 text-white/30 hover:text-white transition-colors"
-          >
-            <ChevronDown size={14} className={`transition-transform ${expanded ? "rotate-180" : ""}`} />
-          </button>
-        )}
-
-        {active && (
-          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-accent" />
-        )}
-      </div>
-
-      {/* Inline accordion — expanded sidebar / mobile drawer */}
-      {hasActions && !collapsed && expanded && (
-        <div className="mt-0.5 mb-1 ml-8 flex flex-col gap-0.5">
-          {item.actions!.map((a) => (
-            <Link
-              key={a.label}
-              href={a.href}
-              onClick={onNavigate}
-              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/45 hover:text-white hover:bg-white/5 no-underline"
-            >
-              <a.icon size={13} />
-              {a.label}
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Flyout — collapsed icon-only sidebar */}
-      {hasActions && collapsed && (
-        <div
-          className={`absolute left-full top-0 z-50 ml-2 w-56 transition-all duration-150 ${
-            flyoutOpen ? "opacity-100 translate-x-0 pointer-events-auto" : "opacity-0 -translate-x-1 pointer-events-none"
-          }`}
-        >
-          <div className="rounded-xl border border-slate-200/70 bg-white shadow-xl shadow-slate-900/10 p-1.5">
-            <p className="px-3 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">
-              {item.label}
-            </p>
-            {item.actions!.map((a) => (
-              <Link
-                key={a.label}
-                href={a.href}
-                onClick={onNavigate}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-slate-50 no-underline"
-              >
-                <a.icon size={15} className="text-accent" />
-                {a.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+// Sidebar inner content
 function SidebarBody({
   collapsed,
   user,
@@ -288,6 +199,9 @@ function SidebarBody({
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const notifRef = useRef<HTMLDivElement>(null);
+  const [notifOpen, setNotifOpen] = useState(false);
+
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
@@ -298,11 +212,20 @@ function SidebarBody({
     }
   };
 
+  const handleNotifications = () => {
+    setNotifOpen(true);
+  };
+
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className={`flex items-center h-[72px] px-4 ${collapsed ? "justify-center" : "justify-start"}`}>
-        <Link href="/dashboard" className="flex items-center gap-2 no-underline">
+      <div
+        className={`flex items-center h-[72px] px-4 ${collapsed ? "justify-center" : "justify-start"}`}
+      >
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2 no-underline"
+        >
           <Image
             src={logistiqLogo}
             alt="Logistiq"
@@ -352,17 +275,31 @@ function SidebarBody({
             onNavigate={onNavigate}
           />
         ))}
+
+        {NOTIFICATIONS_NAV.map((item) => (
+          <NavRow
+            key={item.label}
+            item={{
+              ...item,
+              onClick: handleNotifications,
+            }}
+            collapsed={collapsed}
+            active={notifOpen}
+            onNavigate={onNavigate}
+          />
+        ))}
       </nav>
 
       {/* User footer */}
       <div className="relative px-3 pb-4 pt-2 border-t border-white/10 mt-2">
         {menuOpen && (
           <div className="absolute bottom-full left-3 right-3 mb-2 rounded-xl border border-white/10 bg-[#0A1330] shadow-xl overflow-hidden">
+            {/* Sign out */}
             <button
               type="button"
               onClick={handleSignOut}
               disabled={signingOut}
-              className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-white/70 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-60"
+              className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-red-500 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-60"
             >
               <LogOut size={15} />
               {signingOut ? "Signing out..." : "Sign out"}
@@ -385,7 +322,9 @@ function SidebarBody({
                 <span className="block truncate text-sm font-semibold text-white">
                   {user.firstName} {user.lastName}
                 </span>
-                <span className="block truncate text-xs text-white/45">{formatRole(user.role)}</span>
+                <span className="block truncate text-xs text-white/45">
+                  {formatRole(user.role)}
+                </span>
               </span>
               <ChevronUp
                 size={15}
@@ -422,7 +361,11 @@ export default function Sidebar({
           collapsed ? "w-[76px]" : "w-64"
         }`}
       >
-        <SidebarBody collapsed={collapsed} user={user} onCopilotClick={onCopilotClick} />
+        <SidebarBody
+          collapsed={collapsed}
+          user={user}
+          onCopilotClick={onCopilotClick}
+        />
         <button
           type="button"
           onClick={onToggleCollapsed}
@@ -466,5 +409,235 @@ export default function Sidebar({
         </div>
       )}
     </>
+  );
+}
+
+// Create a row on sidebar
+function NavRow({
+  item,
+  active,
+  collapsed,
+  onNavigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
+  const hasActions = !!item.actions?.length;
+  const [expanded, setExpanded] = useState(false);
+  const [flyoutOpen, setFlyoutOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const openFlyout = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setFlyoutOpen(true);
+  };
+  const closeFlyoutSoon = () => {
+    closeTimer.current = setTimeout(() => setFlyoutOpen(false), 150);
+  };
+
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
+        setFlyoutOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative"
+      onMouseEnter={collapsed && hasActions ? openFlyout : undefined}
+      onMouseLeave={collapsed && hasActions ? closeFlyoutSoon : undefined}
+    >
+      <div
+        className={`group relative flex items-center rounded-xl transition-colors ${
+          active
+            ? "bg-white/10 text-white"
+            : "text-white/55 hover:text-white hover:bg-white/5"
+        }`}
+      >
+        {item.onClick ? (
+          <button
+            type="button"
+            onClick={item.onClick}
+            title={collapsed ? item.label : undefined}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${collapsed ? "justify-center" : ""}`}
+          >
+            <item.icon
+              size={16}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        ) : hasActions ? (
+          <button
+            type="button"
+            onClick={() =>
+              collapsed ? setFlyoutOpen((v) => !v) : setExpanded((v) => !v)
+            }
+            title={collapsed ? item.label : undefined}
+            aria-expanded={collapsed ? flyoutOpen : expanded}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon
+              size={16}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        ) : (
+          <Link
+            href={item.href!}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold no-underline ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon
+              size={18}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </Link>
+        )}
+        {item.onClick ? (
+          <button
+            type="button"
+            onClick={item.onClick}
+            title={collapsed ? item.label : undefined}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon
+              size={18}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        ) : hasActions ? (
+          <button
+            type="button"
+            onClick={() =>
+              collapsed ? setFlyoutOpen((v) => !v) : setExpanded((v) => !v)
+            }
+            title={collapsed ? item.label : undefined}
+            aria-expanded={collapsed ? flyoutOpen : expanded}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold text-left ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon
+              size={18}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </button>
+        ) : (
+          <Link
+            href={item.href!}
+            onClick={onNavigate}
+            title={collapsed ? item.label : undefined}
+            className={`flex flex-1 min-w-0 items-center gap-3 px-3 py-2.5 text-sm font-semibold no-underline ${
+              collapsed ? "justify-center" : ""
+            }`}
+          >
+            <item.icon
+              size={18}
+              strokeWidth={2}
+              className={active ? "text-accent" : ""}
+            />
+
+            {!collapsed && <span className="truncate">{item.label}</span>}
+          </Link>
+        )}
+
+        {hasActions && !collapsed && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-label={`${item.label} quick actions`}
+            className="pr-3 text-white/30 hover:text-white transition-colors"
+          >
+            <ChevronDown
+              size={14}
+              className={`transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
+        )}
+
+        {active && (
+          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-accent" />
+        )}
+      </div>
+
+      {/* Inline accordion — expanded sidebar / mobile drawer */}
+      {hasActions && !collapsed && expanded && (
+        <div className="mt-0.5 mb-1 ml-8 flex flex-col gap-0.5">
+          {item.actions!.map((a) => (
+            <Link
+              key={a.label}
+              href={a.href}
+              onClick={onNavigate}
+              className="flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-white/45 hover:text-white hover:bg-white/5 no-underline"
+            >
+              <a.icon size={13} />
+              {a.label}
+            </Link>
+          ))}
+        </div>
+      )}
+
+      {/* Flyout — collapsed icon-only sidebar */}
+      {hasActions && collapsed && (
+        <div
+          className={`absolute left-full top-0 z-50 ml-2 w-56 transition-all duration-150 ${
+            flyoutOpen
+              ? "opacity-100 translate-x-0 pointer-events-auto"
+              : "opacity-0 -translate-x-1 pointer-events-none"
+          }`}
+        >
+          <div className="rounded-xl border border-slate-200/70 bg-white shadow-xl shadow-slate-900/10 p-1.5">
+            <p className="px-3 pt-1.5 pb-1 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+              {item.label}
+            </p>
+            {item.actions!.map((a) => (
+              <Link
+                key={a.label}
+                href={a.href}
+                onClick={onNavigate}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-slate-50 no-underline"
+              >
+                <a.icon size={15} className="text-accent" />
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

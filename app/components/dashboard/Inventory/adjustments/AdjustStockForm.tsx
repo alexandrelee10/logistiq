@@ -15,16 +15,19 @@ export default function AdjustStockForm({
   warehouses: Warehouse[];
 }) {
   const router = useRouter();
-
+  // 
   const [productId, setProductId] = useState("");
   const [warehouseId, setWarehouseId] = useState("");
+
   const [direction, setDirection] = useState<"add" | "remove">("add");
   const [amount, setAmount] = useState("");
   const [reason, setReason] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
